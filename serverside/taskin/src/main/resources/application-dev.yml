@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:taskindb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+
+logging:
+  level:
+    com.server.taskin: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+
+app:
+  jwt:
+    secret: dev-secret-key-not-for-production
+    expiration: 86400000 # 24 hours
+    refresh-expiration: 604800000 # 7 days
