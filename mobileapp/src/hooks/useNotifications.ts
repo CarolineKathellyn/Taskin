@@ -62,5 +62,7 @@ export function useNotifications(options?: UseNotificationsOptions) {
     notifyProjectCompleted: NotificationService.notifyProjectCompleted.bind(NotificationService),
     cancelNotification: NotificationService.cancelNotification.bind(NotificationService),
     cancelAllNotifications: NotificationService.cancelAllNotifications.bind(NotificationService),
+    reloadSettings: NotificationService.reloadSettings.bind(NotificationService),
+    getSettings: NotificationService.getSettings.bind(NotificationService),
   };
 }

@@ -142,6 +142,7 @@ export const Config = {
     lastSyncAt: 'last_sync_at',
     settings: 'app_settings',
     dbBackup: 'db_backup',
+    notificationSettings: 'notification_settings',
   },
 
   // Database

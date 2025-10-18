@@ -91,7 +91,7 @@ export default function SettingsScreen() {
   };
 
   const handleExportData = () => {
-    Alert.alert('Em breve', 'Exportação de dados será implementada em breve.');
+    navigation.navigate('Export');
   };
 
   const handleAbout = () => {
@@ -151,9 +151,9 @@ export default function SettingsScreen() {
           />
           <View style={styles.separator} />
           <SettingItem
-            icon="download-outline"
-            title="Exportar Dados"
-            subtitle="Fazer backup das suas tarefas"
+            icon="document-text-outline"
+            title="Exportar para PDF"
+            subtitle="Gerar relatório PDF das suas tarefas"
             onPress={handleExportData}
           />
         </Card>

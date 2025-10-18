@@ -2,6 +2,8 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Config } from '../constants';
 
 /**
  * NotificationService - Handles local and push notifications
@@ -28,13 +30,23 @@ export interface NotificationData {
   };
 }
 
+interface NotificationSettings {
+  taskReminders: boolean;
+  taskCompletions: boolean;
+  projectDeadlines: boolean;
+  projectCompletions: boolean;
+  reminderHours: number;
+}
+
 class NotificationService {
   private expoPushToken: string | null = null;
   private isExpoGo: boolean = false;
+  private settings: NotificationSettings | null = null;
 
   constructor() {
     this.isExpoGo = Constants.appOwnership === 'expo';
     this.configureNotifications();
+    this.loadSettings();
   }
 
   private configureNotifications() {
@@ -52,23 +64,28 @@ class NotificationService {
   }
 
   async initialize(): Promise<string | null> {
+    console.log('Initializing notification service for local notifications...');
+
     if (!Device.isDevice) {
-      console.log('Push notifications only work on physical devices');
-      return null;
+      console.log('Running on simulator - local notifications will still work');
+      // Don't return null - local notifications work on simulator too
     }
 
     if (this.isExpoGo) {
-      console.warn('Push notifications are not fully supported in Expo Go. Use development build for full functionality.');
-      // Still try to initialize for local notifications
+      console.log('Running in Expo Go - using local notifications only');
     }
 
     try {
+      console.log('Checking notification permissions...');
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      console.log('Current permission status:', existingStatus);
       let finalStatus = existingStatus;
 
       if (existingStatus !== 'granted') {
+        console.log('Requesting notification permissions...');
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
+        console.log('New permission status:', finalStatus);
       }
 
       if (finalStatus !== 'granted') {
@@ -76,20 +93,13 @@ class NotificationService {
         return null;
       }
 
-      // Only try to get push token if not in Expo Go
-      if (!this.isExpoGo) {
-        try {
-          const token = await Notifications.getExpoPushTokenAsync({
-            projectId: Constants.expoConfig?.extra?.eas?.projectId,
-          });
-          this.expoPushToken = token.data;
-          console.log('Expo Push Token:', this.expoPushToken);
-        } catch (tokenError) {
-          console.warn('Failed to get push token (normal in Expo Go):', tokenError);
-        }
-      }
+      console.log('Notification permissions granted! Local notifications enabled.');
+
+      // Skip push token setup since we only need local notifications
+      console.log('Skipping push token setup - local notifications only');
 
       if (Platform.OS === 'android') {
+        console.log('Setting up Android notification channel...');
         await Notifications.setNotificationChannelAsync('default', {
           name: 'default',
           importance: Notifications.AndroidImportance.MAX,
@@ -98,7 +108,8 @@ class NotificationService {
         });
       }
 
-      return this.expoPushToken;
+      console.log('Local notification service initialized successfully');
+      return null; // No push token needed for local notifications
     } catch (error) {
       console.error('Error initializing notifications:', error);
       return null;
@@ -107,17 +118,20 @@ class NotificationService {
 
   async scheduleLocalNotification(notification: NotificationData): Promise<string | null> {
     try {
+      console.log('Scheduling notification:', notification.title);
       const { title, body, data, trigger } = notification;
 
       let schedulingOptions: any = {};
 
       if (trigger?.date) {
+        console.log('Scheduling for date:', trigger.date);
         schedulingOptions = {
           trigger: {
             date: trigger.date,
           },
         };
       } else if (trigger?.timeInterval) {
+        console.log('Scheduling for time interval:', trigger.timeInterval);
         schedulingOptions = {
           trigger: {
             seconds: trigger.timeInterval,
@@ -135,6 +149,7 @@ class NotificationService {
         ...schedulingOptions,
       });
 
+      console.log('Notification scheduled successfully with ID:', notificationId);
       return notificationId;
     } catch (error) {
       console.error('Error scheduling notification:', error);
@@ -144,6 +159,7 @@ class NotificationService {
 
   async sendImmediateNotification(notification: NotificationData): Promise<string | null> {
     try {
+      console.log('Sending immediate notification:', notification.title);
       const { title, body, data } = notification;
 
       const notificationId = await Notifications.scheduleNotificationAsync({
@@ -156,6 +172,7 @@ class NotificationService {
         trigger: null,
       });
 
+      console.log('Immediate notification sent successfully with ID:', notificationId);
       return notificationId;
     } catch (error) {
       console.error('Error sending immediate notification:', error);
@@ -245,6 +262,11 @@ class NotificationService {
   }
 
   async notifyTaskCompleted(taskTitle: string, taskId: string): Promise<string | null> {
+    if (!this.settings?.taskCompletions) {
+      console.log('Task completion notifications are disabled');
+      return null;
+    }
+
     return this.sendImmediateNotification({
       title: 'Tarefa Concluída! 🎉',
       body: `Parabéns! Você concluiu "${taskTitle}"`,
@@ -253,11 +275,70 @@ class NotificationService {
   }
 
   async notifyProjectCompleted(projectName: string, projectId: string): Promise<string | null> {
+    if (!this.settings?.projectCompletions) {
+      console.log('Project completion notifications are disabled');
+      return null;
+    }
+
     return this.sendImmediateNotification({
       title: 'Projeto Concluído! 🚀',
       body: `Fantástico! Você completou o projeto "${projectName}"`,
       data: { projectId, type: 'project_completed' }
     });
+  }
+
+  private async loadSettings(): Promise<void> {
+    try {
+      const settingsJson = await AsyncStorage.getItem(Config.storageKeys.notificationSettings);
+      if (settingsJson) {
+        this.settings = JSON.parse(settingsJson);
+      } else {
+        // Default settings
+        this.settings = {
+          taskReminders: true,
+          taskCompletions: true,
+          projectDeadlines: true,
+          projectCompletions: true,
+          reminderHours: 1,
+        };
+        await this.saveSettings(this.settings);
+      }
+    } catch (error) {
+      console.error('Error loading notification settings:', error);
+      // Fallback to default settings
+      this.settings = {
+        taskReminders: true,
+        taskCompletions: true,
+        projectDeadlines: true,
+        projectCompletions: true,
+        reminderHours: 1,
+      };
+    }
+  }
+
+  async saveSettings(settings: NotificationSettings): Promise<void> {
+    try {
+      this.settings = settings;
+      await AsyncStorage.setItem(Config.storageKeys.notificationSettings, JSON.stringify(settings));
+    } catch (error) {
+      console.error('Error saving notification settings:', error);
+    }
+  }
+
+  getSettings(): NotificationSettings | null {
+    return this.settings;
+  }
+
+  async updateSettings(newSettings: Partial<NotificationSettings>): Promise<void> {
+    if (this.settings) {
+      const updatedSettings = { ...this.settings, ...newSettings };
+      await this.saveSettings(updatedSettings);
+    }
+  }
+
+  async reloadSettings(): Promise<void> {
+    await this.loadSettings();
+    console.log('Notification settings reloaded:', this.settings);
   }
 }
 

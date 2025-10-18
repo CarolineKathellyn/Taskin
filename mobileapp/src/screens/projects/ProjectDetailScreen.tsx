@@ -13,6 +13,7 @@ import { Strings, TaskPriorities, TaskStatuses, getCategoryById } from '../../co
 import { Task } from '../../types';
 import { DateUtils } from '../../utils';
 import { useTheme, Theme } from '../../contexts/ThemeContext';
+import { useNotifications } from '../../hooks/useNotifications';
 
 type ProjectDetailRouteProp = RouteProp<RootStackParamList, 'ProjectDetail'>;
 type ProjectDetailNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -25,6 +26,7 @@ export default function ProjectDetailScreen() {
   const { user } = useSelector((state: RootState) => state.auth);
   const [refreshing, setRefreshing] = useState(false);
   const { theme } = useTheme();
+  const { notifyProjectCompleted } = useNotifications();
 
   const projectId = route.params?.projectId;
   const project = projects.find(p => p.id === projectId);
@@ -85,6 +87,16 @@ export default function ProjectDetailScreen() {
     const completedTasks = projectTasks.filter(task => task.progressPercentage === 100);
     return Math.round((completedTasks.length / projectTasks.length) * 100);
   }, [projectTasks]);
+
+  const [previousProgress, setPreviousProgress] = useState(0);
+
+  useEffect(() => {
+    if (previousProgress < 100 && projectProgress === 100 && project) {
+      console.log('Project completed! Sending notification for:', project.name);
+      notifyProjectCompleted(project.name, project.id);
+    }
+    setPreviousProgress(projectProgress);
+  }, [projectProgress, project, notifyProjectCompleted, previousProgress]);
 
   const styles = getStyles(theme);
 

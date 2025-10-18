@@ -22,6 +22,7 @@ import SettingsScreen from '../screens/settings/SettingsScreen';
 import ThemeSettingsScreen from '../screens/settings/ThemeSettingsScreen';
 import NotificationSettingsScreen from '../screens/settings/NotificationSettingsScreen';
 import EditProfileScreen from '../screens/settings/EditProfileScreen';
+import ExportScreen from '../screens/settings/ExportScreen';
 import { NotificationHandler } from '../components/NotificationHandler';
 
 export type RootStackParamList = {
@@ -37,6 +38,7 @@ export type RootStackParamList = {
   ThemeSettings: undefined;
   NotificationSettings: undefined;
   EditProfile: undefined;
+  Export: undefined;
 };
 
 export type MainTabParamList = {
@@ -300,6 +302,24 @@ const MainStack = () => {
         component={EditProfileScreen}
         options={({ navigation }) => ({
           title: 'Editar Perfil',
+          headerTintColor: '#007AFF',
+          headerStyle: {
+            backgroundColor: '#F2F2F7',
+            borderBottomWidth: 1,
+            borderBottomColor: '#C6C6C8',
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            color: '#000000',
+          },
+          headerLeft: ({ canGoBack }) => <CustomBackButton canGoBack={canGoBack} navigation={navigation} />,
+        })}
+      />
+      <Stack.Screen
+        name="Export"
+        component={ExportScreen}
+        options={({ navigation }) => ({
+          title: 'Exportar PDF',
           headerTintColor: '#007AFF',
           headerStyle: {
             backgroundColor: '#F2F2F7',

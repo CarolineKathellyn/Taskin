@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Card, Button } from '../../components/common';
-import { Colors } from '../../constants';
+import { Colors, Config } from '../../constants';
 import { useNotifications } from '../../hooks/useNotifications';
 
 interface NotificationSettings {
@@ -26,7 +26,7 @@ const DEFAULT_SETTINGS: NotificationSettings = {
 
 export default function NotificationSettingsScreen() {
   const navigation = useNavigation();
-  const { expoPushToken, cancelAllNotifications } = useNotifications();
+  const { expoPushToken, cancelAllNotifications, reloadSettings } = useNotifications();
   const [settings, setSettings] = useState<NotificationSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +36,7 @@ export default function NotificationSettingsScreen() {
 
   const loadSettings = async () => {
     try {
-      const saved = await AsyncStorage.getItem('notificationSettings');
+      const saved = await AsyncStorage.getItem(Config.storageKeys.notificationSettings);
       if (saved) {
         setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(saved) });
       }
@@ -49,8 +49,12 @@ export default function NotificationSettingsScreen() {
 
   const saveSettings = async (newSettings: NotificationSettings) => {
     try {
-      await AsyncStorage.setItem('notificationSettings', JSON.stringify(newSettings));
+      await AsyncStorage.setItem(Config.storageKeys.notificationSettings, JSON.stringify(newSettings));
       setSettings(newSettings);
+      console.log('Notification settings saved:', newSettings);
+
+      // Reload settings in the notification service to sync the changes
+      await reloadSettings();
     } catch (error) {
       console.error('Error saving notification settings:', error);
       Alert.alert('Erro', 'Não foi possível salvar as configurações');
