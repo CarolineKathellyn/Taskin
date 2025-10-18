@@ -3,7 +3,11 @@ package com.server.taskin.controller;
 import com.server.taskin.dto.AuthResponse;
 import com.server.taskin.dto.LoginRequest;
 import com.server.taskin.dto.RegisterRequest;
+import com.server.taskin.dto.UpdateUserRequest;
+import com.server.taskin.dto.ChangePasswordRequest;
+import com.server.taskin.model.User;
 import com.server.taskin.service.AuthService;
+import com.server.taskin.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -23,6 +27,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private UserService userService;
 
     @Operation(summary = "Login do usuário", description = "Autentica o usuário com email e senha, retorna JWT token")
     @ApiResponses(value = {
@@ -124,6 +131,161 @@ public class AuthController {
 
         public String getUsername() {
             return username;
+        }
+    }
+
+    @Operation(summary = "Atualizar perfil do usuário", description = "Atualiza o nome e email do usuário autenticado")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos ou email já em uso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PutMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateUserRequest updateRequest,
+                                          @RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+
+                // Validate token first
+                if (!authService.validateToken(token)) {
+                    return ResponseEntity.status(401)
+                        .body(new ErrorResponse("Token inválido"));
+                }
+
+                // Get username from token and find user
+                String email = authService.getUsernameFromToken(token);
+                User currentUser = userService.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+                // Update user
+                User updatedUser = userService.updateUser(
+                    currentUser.getId(),
+                    updateRequest.getName(),
+                    updateRequest.getEmail()
+                );
+
+                return ResponseEntity.ok(new UserResponse(
+                    updatedUser.getId(),
+                    updatedUser.getEmail(),
+                    updatedUser.getName(),
+                    updatedUser.getCreatedAt(),
+                    updatedUser.getUpdatedAt()
+                ));
+            }
+
+            return ResponseEntity.badRequest()
+                .body(new ErrorResponse("Header Authorization inválido"));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(new ErrorResponse("Erro ao atualizar usuário: " + e.getMessage()));
+        }
+    }
+
+    private static class UserResponse {
+        private String id;
+        private String email;
+        private String name;
+        private java.time.LocalDateTime createdAt;
+        private java.time.LocalDateTime updatedAt;
+
+        public UserResponse(String id, String email, String name,
+                           java.time.LocalDateTime createdAt, java.time.LocalDateTime updatedAt) {
+            this.id = id;
+            this.email = email;
+            this.name = name;
+            this.createdAt = createdAt;
+            this.updatedAt = updatedAt;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public java.time.LocalDateTime getCreatedAt() {
+            return createdAt;
+        }
+
+        public java.time.LocalDateTime getUpdatedAt() {
+            return updatedAt;
+        }
+    }
+
+    @Operation(summary = "Alterar senha do usuário", description = "Altera a senha do usuário autenticado")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = SuccessResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos ou senha atual incorreta",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+                                           @RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+
+                // Validate token first
+                if (!authService.validateToken(token)) {
+                    return ResponseEntity.status(401)
+                        .body(new ErrorResponse("Token inválido"));
+                }
+
+                // Validate password confirmation
+                if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
+                    return ResponseEntity.badRequest()
+                        .body(new ErrorResponse("Confirmação de senha não confere"));
+                }
+
+                // Get username from token and find user
+                String email = authService.getUsernameFromToken(token);
+                User currentUser = userService.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+                // Change password
+                userService.changePassword(
+                    currentUser.getId(),
+                    changePasswordRequest.getCurrentPassword(),
+                    changePasswordRequest.getNewPassword()
+                );
+
+                return ResponseEntity.ok(new SuccessResponse("Senha alterada com sucesso"));
+            }
+
+            return ResponseEntity.badRequest()
+                .body(new ErrorResponse("Header Authorization inválido"));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(new ErrorResponse("Erro ao alterar senha: " + e.getMessage()));
+        }
+    }
+
+    private static class SuccessResponse {
+        private String message;
+        private long timestamp;
+
+        public SuccessResponse(String message) {
+            this.message = message;
+            this.timestamp = System.currentTimeMillis();
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
         }
     }
 }

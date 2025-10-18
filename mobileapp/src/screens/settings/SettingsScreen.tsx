@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 import { Ionicons } from '@expo/vector-icons';
 
 import { AppDispatch, RootState } from '../../store';
@@ -49,9 +51,11 @@ function SettingItem({ icon, title, subtitle, onPress, rightElement, showArrow =
   );
 }
 
+type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
+
 export default function SettingsScreen() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<SettingsScreenNavigationProp>();
   const { user } = useSelector((state: RootState) => state.auth);
   const { theme, toggleTheme } = useTheme();
   const styles = getStyles(theme);
@@ -79,7 +83,7 @@ export default function SettingsScreen() {
   };
 
   const handleEditProfile = () => {
-    Alert.alert('Em breve', 'Funcionalidade de edição de perfil será implementada em breve.');
+    navigation.navigate('EditProfile');
   };
 
   const handleNotifications = () => {
@@ -104,14 +108,14 @@ export default function SettingsScreen() {
       <Card style={styles.profileCard}>
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
-            <Ionicons name="person-outline" size={32} color={Colors.primary} />
+            <Ionicons name="person-outline" size={32} color={theme.colors.primary} />
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.userName}>{user?.name || 'Usuário'}</Text>
             <Text style={styles.userEmail}>{user?.email || 'email@exemplo.com'}</Text>
           </View>
           <TouchableOpacity onPress={handleEditProfile}>
-            <Ionicons name="pencil-outline" size={20} color={Colors.primary} />
+            <Ionicons name="pencil-outline" size={20} color={theme.colors.primary} />
           </TouchableOpacity>
         </View>
       </Card>

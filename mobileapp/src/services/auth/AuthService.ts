@@ -174,4 +174,86 @@ export class AuthService implements IAuthService {
       return false;
     }
   }
+
+  async updateUser(userData: { name: string; email: string }): Promise<{ id: string; email: string; name: string; createdAt: string; updatedAt: string }> {
+    const token = await this.getStoredToken();
+    if (!token) {
+      throw new TaskinError('Token não encontrado', 'TOKEN_NOT_FOUND');
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/auth/update-profile`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new TaskinError(
+          errorText || 'Erro ao atualizar perfil',
+          'UPDATE_USER_ERROR',
+          response.status
+        );
+      }
+
+      const userResponse = await response.json();
+
+      // Update stored user data
+      await StorageUtils.setAsyncStorageItem(
+        Config.storageKeys.userData,
+        JSON.stringify({
+          userId: userResponse.id,
+          email: userResponse.email,
+          name: userResponse.name,
+        })
+      );
+
+      return userResponse;
+    } catch (error) {
+      if (error instanceof TaskinError) {
+        throw error;
+      }
+      console.error('Update user network error:', error);
+      throw new TaskinError(`Erro de conexão: ${error instanceof Error ? error.message : 'Verifique se o servidor está rodando'}`, 'NETWORK_ERROR');
+    }
+  }
+
+  async changePassword(passwordData: { currentPassword: string; newPassword: string; confirmPassword: string }): Promise<void> {
+    const token = await this.getStoredToken();
+    if (!token) {
+      throw new TaskinError('Token não encontrado', 'TOKEN_NOT_FOUND');
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/auth/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(passwordData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new TaskinError(
+          errorText || 'Erro ao alterar senha',
+          'CHANGE_PASSWORD_ERROR',
+          response.status
+        );
+      }
+
+      // Password change successful - no need to update stored data
+    } catch (error) {
+      if (error instanceof TaskinError) {
+        throw error;
+      }
+      console.error('Change password network error:', error);
+      throw new TaskinError(`Erro de conexão: ${error instanceof Error ? error.message : 'Verifique se o servidor está rodando'}`, 'NETWORK_ERROR');
+    }
+  }
 }

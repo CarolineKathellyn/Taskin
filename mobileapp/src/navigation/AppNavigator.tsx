@@ -21,6 +21,7 @@ import ProjectDetailScreen from '../screens/projects/ProjectDetailScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ThemeSettingsScreen from '../screens/settings/ThemeSettingsScreen';
 import NotificationSettingsScreen from '../screens/settings/NotificationSettingsScreen';
+import EditProfileScreen from '../screens/settings/EditProfileScreen';
 import { NotificationHandler } from '../components/NotificationHandler';
 
 export type RootStackParamList = {
@@ -35,6 +36,7 @@ export type RootStackParamList = {
   ProjectDetail: { projectId: string };
   ThemeSettings: undefined;
   NotificationSettings: undefined;
+  EditProfile: undefined;
 };
 
 export type MainTabParamList = {
@@ -280,6 +282,24 @@ const MainStack = () => {
         component={NotificationSettingsScreen}
         options={({ navigation }) => ({
           title: 'Configurações de Notificação',
+          headerTintColor: '#007AFF',
+          headerStyle: {
+            backgroundColor: '#F2F2F7',
+            borderBottomWidth: 1,
+            borderBottomColor: '#C6C6C8',
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            color: '#000000',
+          },
+          headerLeft: ({ canGoBack }) => <CustomBackButton canGoBack={canGoBack} navigation={navigation} />,
+        })}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={({ navigation }) => ({
+          title: 'Editar Perfil',
           headerTintColor: '#007AFF',
           headerStyle: {
             backgroundColor: '#F2F2F7',
