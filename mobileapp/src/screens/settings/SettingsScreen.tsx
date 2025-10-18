@@ -8,7 +8,7 @@ import { AppDispatch, RootState } from '../../store';
 import { logoutUser } from '../../store/slices/authSlice';
 import { Button, Card, Input } from '../../components/common';
 import { Colors, Strings } from '../../constants';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 interface SettingItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -20,6 +20,9 @@ interface SettingItemProps {
 }
 
 function SettingItem({ icon, title, subtitle, onPress, rightElement, showArrow = true }: SettingItemProps) {
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
+
   return (
     <TouchableOpacity
       style={styles.settingItem}
@@ -29,7 +32,7 @@ function SettingItem({ icon, title, subtitle, onPress, rightElement, showArrow =
     >
       <View style={styles.settingLeft}>
         <View style={styles.settingIcon}>
-          <Ionicons name={icon} size={20} color={Colors.primary} />
+          <Ionicons name={icon} size={20} color={theme.colors.primary} />
         </View>
         <View style={styles.settingText}>
           <Text style={styles.settingTitle}>{title}</Text>
@@ -39,7 +42,7 @@ function SettingItem({ icon, title, subtitle, onPress, rightElement, showArrow =
       <View style={styles.settingRight}>
         {rightElement}
         {showArrow && onPress && (
-          <Ionicons name="chevron-forward-outline" size={16} color={Colors.textSecondary} />
+          <Ionicons name="chevron-forward-outline" size={16} color={theme.colors.textSecondary} />
         )}
       </View>
     </TouchableOpacity>
@@ -51,6 +54,7 @@ export default function SettingsScreen() {
   const navigation = useNavigation();
   const { user } = useSelector((state: RootState) => state.auth);
   const { theme, toggleTheme } = useTheme();
+  const styles = getStyles(theme);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const handleLogout = async () => {
@@ -188,10 +192,10 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: theme.colors.background,
   },
   profileCard: {
     margin: 16,
@@ -204,7 +208,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: Colors.surface,
+    backgroundColor: theme.colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -215,12 +219,12 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
   },
   section: {
     marginBottom: 24,
@@ -228,7 +232,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 8,
     marginHorizontal: 16,
   },
@@ -247,7 +251,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: Colors.surface,
+    backgroundColor: theme.colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -258,12 +262,12 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 2,
   },
   settingSubtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
   },
   settingRight: {
     flexDirection: 'row',
@@ -272,7 +276,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: theme.colors.border,
     marginVertical: 8,
   },
   logoutButton: {
@@ -284,7 +288,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
 });

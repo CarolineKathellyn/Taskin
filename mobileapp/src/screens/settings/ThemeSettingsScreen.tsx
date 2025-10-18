@@ -46,7 +46,7 @@ export default function ThemeSettingsScreen() {
         Escolha como você prefere ver o aplicativo. O tema pode ser alterado a qualquer momento.
       </Text>
 
-      <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+      <Card style={styles.card}>
         {themeOptions.map((option, index) => (
           <TouchableOpacity
             key={option.id}
@@ -92,7 +92,7 @@ export default function ThemeSettingsScreen() {
         ))}
       </Card>
 
-      <Card style={[styles.previewCard, { backgroundColor: theme.colors.surface }]}>
+      <Card style={styles.previewCard}>
         <Text style={[styles.previewTitle, { color: theme.colors.text }]}>
           Pré-visualização
         </Text>

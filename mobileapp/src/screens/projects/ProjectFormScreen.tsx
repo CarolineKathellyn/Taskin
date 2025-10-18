@@ -11,6 +11,7 @@ import { Button, Input, LoadingSpinner } from '../../components/common';
 import { Colors, Strings, CategoryColors, ProjectIcons, HARDCODED_CATEGORIES } from '../../constants';
 import { Project } from '../../types';
 import { ValidationUtils } from '../../utils';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 type ProjectFormRouteProp = RouteProp<RootStackParamList, 'ProjectForm'>;
 
@@ -18,6 +19,8 @@ export default function ProjectFormScreen() {
   const navigation = useNavigation();
   const route = useRoute<ProjectFormRouteProp>();
   const dispatch = useDispatch<AppDispatch>();
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
   const { projects, isLoading } = useSelector((state: RootState) => state.tasks);
   const { user } = useSelector((state: RootState) => state.auth);
 
@@ -144,7 +147,7 @@ export default function ProjectFormScreen() {
             ]}
             onPress={() => setIcon(iconOption.name)}
           >
-            <Ionicons name={iconOption.name as any} size={20} color={icon === iconOption.name ? Colors.background : Colors.text} />
+            <Ionicons name={iconOption.name as any} size={20} color={icon === iconOption.name ? theme.colors.background : theme.colors.text} />
           </TouchableOpacity>
         ))}
       </View>
@@ -169,7 +172,7 @@ export default function ProjectFormScreen() {
             onPress={() => setColor(colorOption)}
           >
             {color === colorOption && (
-              <Ionicons name="checkmark" size={16} color={Colors.background} />
+              <Ionicons name="checkmark" size={16} color={theme.colors.background} />
             )}
           </TouchableOpacity>
         ))}
@@ -232,10 +235,10 @@ export default function ProjectFormScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   scrollView: {
     flex: 1,
@@ -253,7 +256,7 @@ const styles = StyleSheet.create({
   selectorLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 12,
   },
   colorGrid: {
@@ -271,7 +274,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   selectedColor: {
-    borderColor: Colors.text,
+    borderColor: theme.colors.text,
     borderWidth: 3,
   },
   optionsGrid: {
@@ -286,21 +289,21 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.background,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
     gap: 6,
   },
   selectedOption: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   optionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   selectedText: {
-    color: Colors.background,
+    color: theme.colors.background,
   },
   iconGrid: {
     flexDirection: 'row',
@@ -313,17 +316,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: theme.colors.surface,
     borderWidth: 2,
     borderColor: 'transparent',
   },
   selectedIcon: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   selectedIconLabel: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     marginTop: 8,
   },
@@ -332,7 +335,7 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: theme.colors.border,
   },
   cancelButton: {
     flex: 1,

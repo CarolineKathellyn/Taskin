@@ -14,6 +14,7 @@ import { Task, TaskPriority, TaskStatus } from '../../types';
 import { ValidationUtils, DateUtils } from '../../utils';
 import { useNotifications } from '../../hooks/useNotifications';
 import { RecurringTaskService } from '../../services/RecurringTaskService';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 type TaskFormRouteProp = RouteProp<RootStackParamList, 'TaskForm'>;
 
@@ -24,6 +25,8 @@ export default function TaskFormScreen() {
   const { tasks, projects, isLoading } = useSelector((state: RootState) => state.tasks);
   const { user } = useSelector((state: RootState) => state.auth);
   const { scheduleTaskReminder, notifyTaskCompleted } = useNotifications();
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
 
   const taskId = route.params?.taskId;
   const routeProjectId = route.params?.projectId;
@@ -476,10 +479,10 @@ export default function TaskFormScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   scrollContent: {
     padding: 24,
@@ -494,7 +497,7 @@ const styles = StyleSheet.create({
   selectorLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 12,
   },
   optionsContainer: {
@@ -509,18 +512,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.background,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
     gap: 6,
   },
   selectedOption: {
-    backgroundColor: Colors.light,
+    backgroundColor: theme.colors.primary + '20',
     borderWidth: 2,
+    borderColor: theme.colors.primary,
   },
   optionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   categoryDot: {
     width: 12,
@@ -550,7 +554,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: Colors.light,
+    backgroundColor: theme.colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -562,19 +566,19 @@ const styles = StyleSheet.create({
   progressTrack: {
     width: '100%',
     height: 6,
-    backgroundColor: Colors.border,
+    backgroundColor: theme.colors.border,
     borderRadius: 3,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 3,
   },
   progressText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   progressPresets: {
     flexDirection: 'row',
@@ -587,21 +591,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.background,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
     alignItems: 'center',
   },
   selectedPreset: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   presetText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   selectedPresetText: {
-    color: Colors.background,
+    color: theme.colors.background,
   },
   selectorHeader: {
     flexDirection: 'row',
@@ -612,7 +616,7 @@ const styles = StyleSheet.create({
   selectorSubLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   toggleButton: {
@@ -620,20 +624,20 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.surface,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
   },
   toggleButtonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   toggleText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
   },
   toggleTextActive: {
-    color: Colors.background,
+    color: theme.colors.background,
   },
   recurrencePatternContainer: {
     marginTop: 8,
@@ -648,25 +652,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.surface,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
     alignItems: 'center',
   },
   recurrenceOptionActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   recurrenceOptionText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   recurrenceOptionTextActive: {
-    color: Colors.background,
+    color: theme.colors.background,
   },
   recurrenceHint: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     fontStyle: 'italic',
     marginTop: 8,
     textAlign: 'center',

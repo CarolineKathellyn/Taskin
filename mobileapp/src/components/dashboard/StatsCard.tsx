@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 interface StatsCardProps {
   title: string;
@@ -12,6 +12,9 @@ interface StatsCardProps {
 }
 
 export default function StatsCard({ title, value, icon, color, subtitle }: StatsCardProps) {
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
+
   return (
     <View style={[styles.container, { borderLeftColor: color }]}>
       <View style={styles.iconContainer}>
@@ -26,15 +29,15 @@ export default function StatsCard({ title, value, icon, color, subtitle }: Stats
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.card,
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     borderLeftWidth: 4,
-    shadowColor: Colors.dark,
+    shadowColor: theme.colors.dark,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -43,6 +46,8 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   iconContainer: {
     marginRight: 16,
@@ -53,17 +58,17 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 4,
   },
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     marginBottom: 2,
   },
   subtitle: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
   },
 });

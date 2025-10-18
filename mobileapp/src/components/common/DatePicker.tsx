@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants';
 import { DateUtils } from '../../utils';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 interface DatePickerProps {
   label?: string;
@@ -23,6 +23,8 @@ export default function DatePicker({
   placeholder = 'Selecionar data',
 }: DatePickerProps) {
   const [showCalendar, setShowCalendar] = useState(false);
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
 
   const formatDisplayDate = (dateString: string): string => {
     if (!dateString) return '';
@@ -53,8 +55,8 @@ export default function DatePicker({
     return {
       [value]: {
         selected: true,
-        selectedColor: Colors.primary,
-        selectedTextColor: Colors.background,
+        selectedColor: theme.colors.primary,
+        selectedTextColor: theme.colors.background,
       }
     };
   };
@@ -77,7 +79,7 @@ export default function DatePicker({
                 </TouchableOpacity>
               )}
               <TouchableOpacity onPress={() => setShowCalendar(false)} style={styles.closeButton}>
-                <Ionicons name="close-outline" size={24} color={Colors.text} />
+                <Ionicons name="close-outline" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
           </View>
@@ -87,20 +89,20 @@ export default function DatePicker({
             markedDates={getMarkedDates()}
             minDate={DateUtils.getCurrentDateStringBrazil()}
             theme={{
-              backgroundColor: Colors.background,
-              calendarBackground: Colors.background,
-              textSectionTitleColor: Colors.textSecondary,
-              selectedDayBackgroundColor: Colors.primary,
-              selectedDayTextColor: Colors.background,
-              todayTextColor: Colors.primary,
-              dayTextColor: Colors.text,
-              textDisabledColor: Colors.disabled,
-              dotColor: Colors.primary,
-              selectedDotColor: Colors.background,
-              arrowColor: Colors.primary,
-              disabledArrowColor: Colors.disabled,
-              monthTextColor: Colors.text,
-              indicatorColor: Colors.primary,
+              backgroundColor: theme.colors.background,
+              calendarBackground: theme.colors.background,
+              textSectionTitleColor: theme.colors.textSecondary,
+              selectedDayBackgroundColor: theme.colors.primary,
+              selectedDayTextColor: theme.colors.background,
+              todayTextColor: theme.colors.primary,
+              dayTextColor: theme.colors.text,
+              textDisabledColor: theme.colors.disabled,
+              dotColor: theme.colors.primary,
+              selectedDotColor: theme.colors.background,
+              arrowColor: theme.colors.primary,
+              disabledArrowColor: theme.colors.disabled,
+              monthTextColor: theme.colors.text,
+              indicatorColor: theme.colors.primary,
               textDayFontFamily: 'System',
               textMonthFontFamily: 'System',
               textDayHeaderFontFamily: 'System',
@@ -131,13 +133,13 @@ export default function DatePicker({
         style={[styles.inputContainer, error && styles.error]}
         onPress={() => setShowCalendar(true)}
       >
-        <Ionicons name="calendar-outline" size={20} color={Colors.textSecondary} style={styles.icon} />
+        <Ionicons name="calendar-outline" size={20} color={theme.colors.textSecondary} style={styles.icon} />
         <Text style={[styles.input, !value && styles.placeholder]}>
           {value ? formatDisplayDate(value) : placeholder}
         </Text>
         {value && (
           <TouchableOpacity onPress={clearDate} style={styles.clearIconButton}>
-            <Ionicons name="close-circle-outline" size={20} color={Colors.textSecondary} />
+            <Ionicons name="close-circle-outline" size={20} color={theme.colors.textSecondary} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
@@ -149,31 +151,31 @@ export default function DatePicker({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     marginBottom: 16,
   },
   label: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 8,
   },
   required: {
-    color: Colors.danger,
+    color: theme.colors.danger,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 8,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.surface,
     minHeight: 44,
     paddingHorizontal: 12,
   },
   error: {
-    borderColor: Colors.danger,
+    borderColor: theme.colors.danger,
   },
   icon: {
     marginRight: 8,
@@ -181,18 +183,18 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
     paddingVertical: 10,
   },
   placeholder: {
-    color: Colors.placeholder,
+    color: theme.colors.placeholder,
   },
   clearIconButton: {
     padding: 4,
   },
   errorText: {
     fontSize: 14,
-    color: Colors.danger,
+    color: theme.colors.danger,
     marginTop: 4,
   },
   modalOverlay: {
@@ -202,12 +204,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.card,
     borderRadius: 16,
     margin: 20,
     maxWidth: 400,
     width: '90%',
-    shadowColor: Colors.dark,
+    shadowColor: theme.colors.dark,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -215,6 +217,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -222,12 +226,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   headerButtons: {
     flexDirection: 'row',
@@ -237,11 +241,11 @@ const styles = StyleSheet.create({
   clearButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: Colors.danger,
+    backgroundColor: theme.colors.danger,
     borderRadius: 6,
   },
   clearButtonText: {
-    color: Colors.background,
+    color: theme.colors.background,
     fontSize: 14,
     fontWeight: '500',
   },

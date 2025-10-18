@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextInput, View, Text, StyleSheet, TextInputProps, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -25,6 +25,8 @@ export default function Input({
   ...props
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
 
   const containerStyles = [styles.container, containerStyle];
   const inputContainerStyles = [
@@ -47,7 +49,7 @@ export default function Input({
           <Ionicons
             name={leftIcon}
             size={20}
-            color={isFocused ? Colors.primary : Colors.textSecondary}
+            color={isFocused ? theme.colors.primary : theme.colors.textSecondary}
             style={styles.leftIcon}
           />
         )}
@@ -55,14 +57,14 @@ export default function Input({
           style={inputStyles}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholderTextColor={Colors.placeholder}
+          placeholderTextColor={theme.colors.placeholder}
           {...props}
         />
         {rightIcon && (
           <Ionicons
             name={rightIcon}
             size={20}
-            color={Colors.textSecondary}
+            color={theme.colors.textSecondary}
             style={styles.rightIcon}
             onPress={onRightIconPress}
           />
@@ -73,39 +75,39 @@ export default function Input({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     marginBottom: 16,
   },
   label: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 8,
   },
   required: {
-    color: Colors.danger,
+    color: theme.colors.danger,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 8,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.surface,
     minHeight: 44,
   },
   focused: {
-    borderColor: Colors.primary,
+    borderColor: theme.colors.primary,
     borderWidth: 2,
   },
   error: {
-    borderColor: Colors.danger,
+    borderColor: theme.colors.danger,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
@@ -117,7 +119,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 14,
-    color: Colors.danger,
+    color: theme.colors.danger,
     marginTop: 4,
   },
 });

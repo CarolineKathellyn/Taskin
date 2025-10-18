@@ -7,7 +7,7 @@ import { RootState, AppDispatch } from '../../store';
 import { loadTasks, processRecurringTasks } from '../../store/slices/taskAsyncThunks';
 import { Colors, Strings } from '../../constants';
 import { DateUtils } from '../../utils';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 import StatsCard from '../../components/dashboard/StatsCard';
 import TaskProgress from '../../components/dashboard/TaskProgress';
@@ -20,6 +20,7 @@ export default function HomeScreen() {
   const { user } = useSelector((state: RootState) => state.auth);
   const [refreshing, setRefreshing] = React.useState(false);
   const { theme } = useTheme();
+  const styles = getStyles(theme);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -200,36 +201,36 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: theme.colors.background,
   },
   centerContainer: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   header: {
     padding: 24,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   greeting: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   userName: {
     fontSize: 16,
-    color: Colors.primary,
+    color: theme.colors.primary,
     fontWeight: '500',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
   },
   statsContainer: {
     paddingHorizontal: 16,
@@ -249,12 +250,12 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   errorText: {
     fontSize: 16,
-    color: Colors.danger,
+    color: theme.colors.danger,
     textAlign: 'center',
   },
 });

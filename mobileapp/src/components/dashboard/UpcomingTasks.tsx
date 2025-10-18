@@ -6,8 +6,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 
 import { Task } from '../../types';
 import { RootStackParamList } from '../../navigation/AppNavigator';
-import { Colors, TaskPriorities, TaskStatuses } from '../../constants';
+import { TaskPriorities, TaskStatuses } from '../../constants';
 import { DateUtils } from '../../utils';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 interface UpcomingTasksProps {
   tasks: Task[];
@@ -18,6 +19,8 @@ type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 export default function UpcomingTasks({ tasks, maxItems = 5 }: UpcomingTasksProps) {
   const navigation = useNavigation<NavigationProp>();
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
 
   const upcomingTasks = tasks
     .filter(task => task.status !== 'concluida' && task.dueDate)
@@ -61,7 +64,7 @@ export default function UpcomingTasks({ tasks, maxItems = 5 }: UpcomingTasksProp
               </Text>
             </View>
           </View>
-          <Ionicons name="chevron-forward-outline" size={16} color={Colors.textSecondary} />
+          <Ionicons name="chevron-forward-outline" size={16} color={theme.colors.textSecondary} />
         </View>
       </TouchableOpacity>
     );
@@ -74,7 +77,7 @@ export default function UpcomingTasks({ tasks, maxItems = 5 }: UpcomingTasksProp
           <Text style={styles.title}>Próximas Tarefas</Text>
         </View>
         <View style={styles.emptyState}>
-          <Ionicons name="checkmark-circle-outline" size={48} color={Colors.success} />
+          <Ionicons name="checkmark-circle-outline" size={48} color={theme.colors.success} />
           <Text style={styles.emptyText}>Todas as tarefas estão em dia!</Text>
         </View>
       </View>
@@ -101,13 +104,13 @@ export default function UpcomingTasks({ tasks, maxItems = 5 }: UpcomingTasksProp
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: Colors.dark,
+    shadowColor: theme.colors.dark,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -115,6 +118,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   header: {
     flexDirection: 'row',
@@ -125,23 +130,23 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   seeAll: {
     fontSize: 14,
-    color: Colors.primary,
+    color: theme.colors.primary,
     fontWeight: '500',
   },
   taskItem: {
     marginBottom: 12,
     padding: 12,
-    backgroundColor: Colors.surface,
+    backgroundColor: theme.colors.surface,
     borderRadius: 8,
   },
   overdueTask: {
-    backgroundColor: Colors.danger + '10',
+    backgroundColor: theme.colors.danger + '10',
     borderLeftWidth: 3,
-    borderLeftColor: Colors.danger,
+    borderLeftColor: theme.colors.danger,
   },
   taskHeader: {
     flexDirection: 'row',
@@ -159,7 +164,7 @@ const styles = StyleSheet.create({
   taskTitle: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 4,
   },
   taskMeta: {
@@ -169,15 +174,15 @@ const styles = StyleSheet.create({
   },
   taskDate: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
   },
   taskDays: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     fontWeight: '500',
   },
   overdueText: {
-    color: Colors.danger,
+    color: theme.colors.danger,
   },
   emptyState: {
     alignItems: 'center',
@@ -185,7 +190,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     marginTop: 8,
     textAlign: 'center',
   },

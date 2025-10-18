@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors } from '../../constants';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 interface TaskProgressProps {
   completed: number;
@@ -9,6 +9,8 @@ interface TaskProgressProps {
 }
 
 export default function TaskProgress({ completed, total, title }: TaskProgressProps) {
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
   const percentage = total > 0 ? (completed / total) * 100 : 0;
 
   return (
@@ -32,13 +34,13 @@ export default function TaskProgress({ completed, total, title }: TaskProgressPr
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: Colors.dark,
+    shadowColor: theme.colors.dark,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -46,6 +48,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   header: {
     flexDirection: 'row',
@@ -56,23 +60,23 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   stats: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   progressBarContainer: {
     height: 8,
-    backgroundColor: Colors.surface,
+    backgroundColor: theme.colors.surface,
     borderRadius: 4,
     marginBottom: 12,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 4,
   },
   labels: {
@@ -81,6 +85,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
   },
 });
