@@ -8,9 +8,10 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import { RootState, AppDispatch } from '../../store';
 import { updateTask, deleteTask } from '../../store/slices/taskAsyncThunks';
 import { Button, Card, LoadingSpinner } from '../../components/common';
+import { AttachmentList } from '../../components/attachments';
 import { TaskPriorities, TaskStatuses } from '../../constants';
 import { HARDCODED_CATEGORIES } from '../../constants/Categories';
-import { Task } from '../../types';
+import { Task, TaskAttachment } from '../../types';
 import { DateUtils } from '../../utils';
 import { useNotifications } from '../../hooks/useNotifications';
 import { useTheme, Theme } from '../../contexts/ThemeContext';
@@ -30,6 +31,7 @@ export default function TaskDetailsScreen() {
   const taskId = route.params?.taskId;
   const task = tasks.find(t => t.id === taskId);
   const [updating, setUpdating] = useState(false);
+  const [attachments, setAttachments] = useState<TaskAttachment[]>(task?.attachments || []);
 
   const category = useMemo(() => {
     return task?.categoryId ? HARDCODED_CATEGORIES.find(c => c.id === task.categoryId) : null;
@@ -106,6 +108,25 @@ export default function TaskDetailsScreen() {
 
   const handleEdit = () => {
     navigation.navigate('TaskForm', { taskId: task?.id });
+  };
+
+  const handleAttachmentDeleted = async (attachmentId: string) => {
+    // Update local state
+    setAttachments(attachments.filter(a => a.id !== attachmentId));
+
+    // Update task in store
+    if (task) {
+      try {
+        await dispatch(updateTask({
+          id: task.id,
+          updates: {
+            attachments: attachments.filter(a => a.id !== attachmentId)
+          }
+        })).unwrap();
+      } catch (error) {
+        console.error('Error updating task attachments:', error);
+      }
+    }
   };
 
   const handleDelete = () => {
@@ -342,6 +363,16 @@ export default function TaskDetailsScreen() {
         )}
       </Card>
 
+      {/* Attachments Section */}
+      {attachments && attachments.length > 0 && (
+        <Card style={styles.attachmentsCard}>
+          <AttachmentList
+            attachments={attachments}
+            onDelete={handleAttachmentDeleted}
+          />
+        </Card>
+      )}
+
       {updating && <LoadingSpinner text="Atualizando progresso..." />}
     </ScrollView>
   );
@@ -391,6 +422,10 @@ const getStyles = (theme: Theme) => StyleSheet.create({
     margin: 16,
   },
   detailsCard: {
+    margin: 16,
+    marginTop: 0,
+  },
+  attachmentsCard: {
     margin: 16,
     marginTop: 0,
   },

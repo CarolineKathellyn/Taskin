@@ -50,7 +50,14 @@ export class DateUtils {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const due = new Date(dueDate);
+    // Parse the due date properly, handling YYYY-MM-DD format in local timezone
+    let due: Date;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
+      const [year, month, day] = dueDate.split('-').map(Number);
+      due = new Date(year, month - 1, day); // month is 0-indexed, create in local timezone
+    } else {
+      due = new Date(dueDate);
+    }
     due.setHours(0, 0, 0, 0);
 
     const diffTime = due.getTime() - today.getTime();

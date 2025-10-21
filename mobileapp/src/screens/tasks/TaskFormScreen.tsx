@@ -9,8 +9,9 @@ import { RootState, AppDispatch } from '../../store';
 import { createTask, updateTask } from '../../store/slices/taskAsyncThunks';
 import { loadProjects } from '../../store/slices/projectAsyncThunks';
 import { Button, Input, LoadingSpinner, DatePicker } from '../../components/common';
+import { AttachmentPicker, AttachmentList } from '../../components/attachments';
 import { Colors, Strings, TaskPriorities, TaskStatuses, CategoryColors, HARDCODED_CATEGORIES } from '../../constants';
-import { Task, TaskPriority, TaskStatus } from '../../types';
+import { Task, TaskPriority, TaskStatus, TaskAttachment } from '../../types';
 import { ValidationUtils, DateUtils } from '../../utils';
 import { useNotifications } from '../../hooks/useNotifications';
 import { RecurringTaskService } from '../../services/RecurringTaskService';
@@ -44,6 +45,7 @@ export default function TaskFormScreen() {
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrencePattern, setRecurrencePattern] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [attachments, setAttachments] = useState<TaskAttachment[]>([]);
 
   const [titleError, setTitleError] = useState('');
   const [dueDateError, setDueDateError] = useState('');
@@ -68,11 +70,20 @@ export default function TaskFormScreen() {
       setProgressPercentage(existingTask.progressPercentage);
       setIsRecurring(existingTask.isRecurring || false);
       setRecurrencePattern(existingTask.recurrencePattern || 'weekly');
+      setAttachments(existingTask.attachments || []);
     } else if (routeProjectId) {
       // Pre-select project when creating task from project screen
       setProjectId(routeProjectId);
     }
   }, [isEditing, existingTask, routeProjectId]);
+
+  const handleAttachmentAdded = (attachment: TaskAttachment) => {
+    setAttachments([...attachments, attachment]);
+  };
+
+  const handleAttachmentDeleted = (attachmentId: string) => {
+    setAttachments(attachments.filter(a => a.id !== attachmentId));
+  };
 
   const validateForm = (): boolean => {
     let isValid = true;
@@ -155,6 +166,7 @@ export default function TaskFormScreen() {
         userId: user.id,
         isRecurring,
         recurrencePattern: isRecurring ? recurrencePattern : undefined,
+        attachments: attachments,
       };
 
       console.log('Task data:', taskData);
@@ -458,6 +470,20 @@ export default function TaskFormScreen() {
         {renderProjectSelector()}
         {isEditing && renderProgressSelector()}
         {renderRecurringSelector()}
+
+        {/* Attachments section - only show if editing (task already created) */}
+        {isEditing && taskId && (
+          <>
+            <AttachmentList
+              attachments={attachments}
+              onDelete={handleAttachmentDeleted}
+            />
+            <AttachmentPicker
+              taskId={taskId}
+              onAttachmentAdded={handleAttachmentAdded}
+            />
+          </>
+        )}
 
         <View style={styles.buttonContainer}>
           <Button

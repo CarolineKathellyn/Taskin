@@ -145,6 +145,14 @@ export class DatabaseService implements IDatabaseService {
     } catch (error) {
       console.log('icon column already exists or migration not needed');
     }
+
+    // Migration: Add attachments column to tasks table
+    try {
+      await this.db.execAsync('ALTER TABLE tasks ADD COLUMN attachments TEXT');
+      console.log('Added attachments column to tasks table');
+    } catch (error) {
+      console.log('attachments column already exists or migration not needed');
+    }
   }
 
   async getTasks(userId: string): Promise<Task[]> {
@@ -199,8 +207,8 @@ export class DatabaseService implements IDatabaseService {
 
     try {
       await this.db.runAsync(
-        `INSERT INTO tasks (id, title, description, notes, priority, status, due_date, category_id, project_id, progress_percentage, user_id, created_at, updated_at, completed_at, is_recurring, recurrence_pattern, parent_task_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO tasks (id, title, description, notes, priority, status, due_date, category_id, project_id, progress_percentage, user_id, created_at, updated_at, completed_at, is_recurring, recurrence_pattern, parent_task_id, attachments)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           newTask.id,
           newTask.title,
@@ -219,6 +227,7 @@ export class DatabaseService implements IDatabaseService {
           newTask.isRecurring ? 1 : 0,
           newTask.recurrencePattern || null,
           newTask.parentTaskId || null,
+          newTask.attachments ? JSON.stringify(newTask.attachments) : null,
         ]
       );
 
@@ -260,7 +269,7 @@ export class DatabaseService implements IDatabaseService {
       await this.db.runAsync(
         `UPDATE tasks SET title = ?, description = ?, notes = ?, priority = ?, status = ?, due_date = ?,
          category_id = ?, project_id = ?, progress_percentage = ?, updated_at = ?, completed_at = ?,
-         is_recurring = ?, recurrence_pattern = ?, parent_task_id = ? WHERE id = ?`,
+         is_recurring = ?, recurrence_pattern = ?, parent_task_id = ?, attachments = ? WHERE id = ?`,
         [
           updatedTask.title,
           updatedTask.description || null,
@@ -276,6 +285,7 @@ export class DatabaseService implements IDatabaseService {
           updatedTask.isRecurring ? 1 : 0,
           updatedTask.recurrencePattern || null,
           updatedTask.parentTaskId || null,
+          updatedTask.attachments ? JSON.stringify(updatedTask.attachments) : null,
           id,
         ]
       );
@@ -570,6 +580,14 @@ export class DatabaseService implements IDatabaseService {
   }
 
   private mapDatabaseTaskToTask(dbTask: any): Task {
+    let attachments;
+    try {
+      attachments = dbTask.attachments ? JSON.parse(dbTask.attachments) : undefined;
+    } catch (error) {
+      console.error('Error parsing attachments JSON:', error);
+      attachments = undefined;
+    }
+
     return {
       id: dbTask.id,
       title: dbTask.title,
@@ -588,6 +606,7 @@ export class DatabaseService implements IDatabaseService {
       isRecurring: !!dbTask.is_recurring,
       recurrencePattern: dbTask.recurrence_pattern as Task['recurrencePattern'],
       parentTaskId: dbTask.parent_task_id,
+      attachments: attachments,
     };
   }
 

@@ -8,6 +8,15 @@ export interface User {
   updatedAt: string;
 }
 
+export interface TaskAttachment {
+  id: string;
+  fileName: string;
+  filePath: string;
+  fileType: 'image' | 'document' | 'link';
+  fileSize?: number;
+  createdAt?: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -26,6 +35,7 @@ export interface Task {
   isRecurring?: boolean;
   recurrencePattern?: 'daily' | 'weekly' | 'monthly';
   parentTaskId?: string; // For recurring task instances
+  attachments?: TaskAttachment[];
 }
 
 export interface Category {
@@ -105,6 +115,7 @@ export interface DatabaseTask {
   is_recurring?: number; // SQLite uses integers for booleans
   recurrence_pattern?: string;
   parent_task_id?: string;
+  attachments?: string; // JSON string of TaskAttachment[]
 }
 
 export interface DatabaseCategory {
