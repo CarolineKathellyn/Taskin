@@ -6,7 +6,7 @@
 
 ### ✨ **Características Principais:**
 - 🔄 **Sincronização Inteligente**: Funciona offline e online com sync automática
-- 🎨 **Design Focado**: Interface otimizada para produtividade e concentração  
+- 🎨 **Design  Focado**: Interface otimizada para produtividade e concentração  
 - 🔐 **Segurança Robusta**: Autenticação JWT e criptografia de dados
 - 👥 **Colaboração Real-time**: Compartilhamento e edição colaborativa
 - 📊 **Analytics Avançados**: Relatórios detalhados de produtividade
