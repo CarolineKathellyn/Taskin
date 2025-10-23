@@ -2,13 +2,9 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { Project } from '../../types';
 import { DatabaseService } from '../../services/database/DatabaseService';
 
-let databaseService: DatabaseService | null = null;
-
 const getDatabaseService = async (): Promise<DatabaseService> => {
-  if (!databaseService) {
-    databaseService = new DatabaseService();
-    await databaseService.initializeDatabase();
-  }
+  const databaseService = DatabaseService.getInstance();
+  await databaseService.initializeDatabase();
   return databaseService;
 };
 

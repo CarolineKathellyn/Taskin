@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import { authSlice } from './slices/authSlice';
 import { taskSlice } from './slices/taskSlice';
 import { syncSlice } from './slices/syncSlice';
+import { teamsSlice } from './slices/teamsSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authSlice.reducer,
     tasks: taskSlice.reducer,
     sync: syncSlice.reducer,
+    teams: teamsSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -17,6 +17,23 @@ export interface TaskAttachment {
   createdAt?: string;
 }
 
+export interface Team {
+  id: string;
+  name: string;
+  description?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamMember {
+  id: string;
+  teamId: string;
+  userId: string;
+  role: 'owner' | 'member';
+  joinedAt: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -29,6 +46,9 @@ export interface Task {
   projectId?: string;
   progressPercentage: number;
   userId: string;
+  teamId?: string; // Team sharing support
+  lastModifiedBy?: string; // For tracking who made the last change
+  version: number; // For conflict detection
   createdAt: string;
   updatedAt: string;
   completedAt?: string;
@@ -43,6 +63,9 @@ export interface Category {
   name: string;
   color: string;
   userId: string;
+  teamId?: string; // Team sharing support
+  lastModifiedBy?: string;
+  version: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -55,6 +78,9 @@ export interface Project {
   categoryId?: string;
   icon: string;
   userId: string;
+  teamId?: string; // Team sharing support
+  lastModifiedBy?: string;
+  version: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -96,6 +122,38 @@ export interface SyncResponse {
   success: boolean;
 }
 
+// Delta Sync Types
+export interface DeltaSyncChange {
+  entityType: 'task' | 'project' | 'category';
+  entityId: string;
+  action: 'create' | 'update' | 'delete';
+  data?: any;
+  timestamp: string;
+  version: number;
+}
+
+export interface DeltaSyncRequest {
+  changes: DeltaSyncChange[];
+  lastSyncAt?: string;
+}
+
+export interface DeltaSyncResponse {
+  changes: DeltaSyncChange[];
+  conflicts: DeltaSyncConflict[];
+  lastSyncAt: string;
+  success: boolean;
+  message: string;
+}
+
+export interface DeltaSyncConflict {
+  entityType: 'task' | 'project' | 'category';
+  entityId: string;
+  localVersion: number;
+  serverVersion: number;
+  serverData: any;
+  localData: any;
+}
+
 // Database Types
 export interface DatabaseTask {
   id: string;
@@ -109,6 +167,9 @@ export interface DatabaseTask {
   project_id?: string;
   progress_percentage: number;
   user_id: string;
+  team_id?: string;
+  last_modified_by?: string;
+  version: number;
   created_at: string;
   updated_at: string;
   completed_at?: string;
@@ -123,6 +184,9 @@ export interface DatabaseCategory {
   name: string;
   color: string;
   user_id: string;
+  team_id?: string;
+  last_modified_by?: string;
+  version: number;
   created_at: string;
   updated_at: string;
 }
@@ -135,8 +199,39 @@ export interface DatabaseProject {
   category_id?: string;
   icon: string;
   user_id: string;
+  team_id?: string;
+  last_modified_by?: string;
+  version: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface DatabaseTeam {
+  id: string;
+  name: string;
+  description?: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DatabaseTeamMember {
+  id: string;
+  team_id: string;
+  user_id: string;
+  role: string;
+  joined_at: string;
+}
+
+export interface DatabaseSyncLog {
+  id: string;
+  user_id: string;
+  entity_type: string;
+  entity_id: string;
+  action: string;
+  team_id?: string;
+  timestamp: string;
+  data_snapshot?: string;
 }
 
 export interface DatabaseUser {
@@ -210,10 +305,19 @@ export interface SyncState {
   pendingChanges: number;
 }
 
+export interface TeamState {
+  teams: Team[];
+  currentTeam: Team | null;
+  members: TeamMember[];
+  isLoading: boolean;
+  error: string | null;
+}
+
 export interface RootState {
   auth: AuthState;
   tasks: TaskState;
   sync: SyncState;
+  teams: TeamState;
 }
 
 // UI Types

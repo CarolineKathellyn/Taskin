@@ -22,6 +22,7 @@ export default function ProjectFormScreen() {
   const { theme } = useTheme();
   const styles = getStyles(theme);
   const { projects, isLoading } = useSelector((state: RootState) => state.tasks);
+  const { teams } = useSelector((state: RootState) => state.teams);
   const { user } = useSelector((state: RootState) => state.auth);
 
   const projectId = route.params?.projectId;
@@ -32,6 +33,7 @@ export default function ProjectFormScreen() {
   const [description, setDescription] = useState('');
   const [color, setColor] = useState<string>(CategoryColors[0]);
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
+  const [teamId, setTeamId] = useState<string | undefined>(undefined);
   const [icon, setIcon] = useState<string>('briefcase');
 
   const [nameError, setNameError] = useState('');
@@ -43,6 +45,7 @@ export default function ProjectFormScreen() {
       setDescription(existingProject.description || '');
       setColor(existingProject.color);
       setCategoryId(existingProject.categoryId);
+      setTeamId(existingProject.teamId);
       setIcon(existingProject.icon || 'briefcase');
     }
   }, [isEditing, existingProject]);
@@ -78,6 +81,7 @@ export default function ProjectFormScreen() {
         description: description.trim() || undefined,
         color,
         categoryId,
+        teamId,
         icon,
         userId: user.id,
       };
@@ -180,6 +184,44 @@ export default function ProjectFormScreen() {
     </View>
   );
 
+  const renderTeamSelector = () => (
+    <View style={styles.selectorContainer}>
+      <Text style={styles.selectorLabel}>Equipe</Text>
+      <View style={styles.optionsGrid}>
+        <TouchableOpacity
+          style={[
+            styles.categoryOption,
+            !teamId && styles.selectedOption
+          ]}
+          onPress={() => setTeamId(undefined)}
+        >
+          <Ionicons name="person-outline" size={16} color={theme.colors.text} />
+          <Text style={[styles.optionText, !teamId && styles.selectedText]}>Pessoal</Text>
+        </TouchableOpacity>
+        {teams.map((team) => (
+          <TouchableOpacity
+            key={team.id}
+            style={[
+              styles.categoryOption,
+              teamId === team.id && styles.selectedOption,
+              { borderColor: Colors.info }
+            ]}
+            onPress={() => setTeamId(team.id)}
+          >
+            <Ionicons name="people" size={16} color={Colors.info} />
+            <Text style={[
+              styles.optionText,
+              teamId === team.id && styles.selectedText,
+              { color: Colors.info }
+            ]}>
+              {team.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
   if (isLoading && isEditing && !existingProject) {
     return <LoadingSpinner text="Carregando projeto..." />;
   }
@@ -211,6 +253,7 @@ export default function ProjectFormScreen() {
           />
 
           {renderCategorySelector()}
+          {renderTeamSelector()}
           {renderIconSelector()}
           {renderColorSelector()}
         </View>

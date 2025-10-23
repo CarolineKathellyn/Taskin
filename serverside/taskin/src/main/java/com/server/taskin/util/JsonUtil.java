@@ -28,6 +28,10 @@ public class JsonUtil {
         return objectMapper.writeValueAsString(object);
     }
 
+    public static <T> T fromJson(String json, Class<T> valueType) throws JsonProcessingException {
+        return objectMapper.readValue(json, valueType);
+    }
+
     public static boolean hasRequiredFields(JsonNode jsonNode, String... fields) {
         for (String field : fields) {
             if (!jsonNode.has(field)) {

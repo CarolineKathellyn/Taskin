@@ -3,13 +3,9 @@ import { Task } from '../../types';
 import { DatabaseService } from '../../services/database/DatabaseService';
 import { AutoRecurringTaskService } from '../../services/AutoRecurringTaskService';
 
-let databaseService: DatabaseService | null = null;
-
 const getDatabaseService = async (): Promise<DatabaseService> => {
-  if (!databaseService) {
-    databaseService = new DatabaseService();
-    await databaseService.initializeDatabase();
-  }
+  const databaseService = DatabaseService.getInstance();
+  await databaseService.initializeDatabase();
   return databaseService;
 };
 

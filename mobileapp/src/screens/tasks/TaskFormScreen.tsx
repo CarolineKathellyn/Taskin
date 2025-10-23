@@ -24,6 +24,7 @@ export default function TaskFormScreen() {
   const route = useRoute<TaskFormRouteProp>();
   const dispatch = useDispatch<AppDispatch>();
   const { tasks, projects, isLoading } = useSelector((state: RootState) => state.tasks);
+  const { teams } = useSelector((state: RootState) => state.teams);
   const { user } = useSelector((state: RootState) => state.auth);
   const { scheduleTaskReminder, notifyTaskCompleted } = useNotifications();
   const { theme } = useTheme();
@@ -42,6 +43,7 @@ export default function TaskFormScreen() {
   const [dueDate, setDueDate] = useState('');
   const [categoryId, setCategoryId] = useState<string | undefined>();
   const [projectId, setProjectId] = useState<string | undefined>();
+  const [teamId, setTeamId] = useState<string | undefined>();
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrencePattern, setRecurrencePattern] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
@@ -67,6 +69,7 @@ export default function TaskFormScreen() {
       setDueDate(existingTask.dueDate || '');
       setCategoryId(existingTask.categoryId);
       setProjectId(existingTask.projectId);
+      setTeamId(existingTask.teamId);
       setProgressPercentage(existingTask.progressPercentage);
       setIsRecurring(existingTask.isRecurring || false);
       setRecurrencePattern(existingTask.recurrencePattern || 'weekly');
@@ -74,8 +77,15 @@ export default function TaskFormScreen() {
     } else if (routeProjectId) {
       // Pre-select project when creating task from project screen
       setProjectId(routeProjectId);
+
+      // Also pre-select team if project belongs to a team
+      const selectedProject = projects.find(p => p.id === routeProjectId);
+      if (selectedProject && selectedProject.teamId) {
+        setTeamId(selectedProject.teamId);
+        console.log(`[TaskForm] Auto-selected team ${selectedProject.teamId} from project`);
+      }
     }
-  }, [isEditing, existingTask, routeProjectId]);
+  }, [isEditing, existingTask, routeProjectId, projects]);
 
   const handleAttachmentAdded = (attachment: TaskAttachment) => {
     setAttachments([...attachments, attachment]);
@@ -162,6 +172,7 @@ export default function TaskFormScreen() {
         dueDate: dueDate, // Now required - validation ensures this is not empty
         categoryId,
         projectId,
+        teamId, // Include team ID for sharing
         progressPercentage,
         userId: user.id,
         isRecurring,
@@ -307,6 +318,38 @@ export default function TaskFormScreen() {
           >
             <View style={[styles.categoryDot, { backgroundColor: project.color }]} />
             <Text style={styles.optionText}>{project.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
+  const renderTeamSelector = () => (
+    <View style={styles.selectorContainer}>
+      <Text style={styles.selectorLabel}>Equipe</Text>
+      <View style={styles.optionsContainer}>
+        <TouchableOpacity
+          style={[
+            styles.option,
+            !teamId && styles.selectedOption
+          ]}
+          onPress={() => setTeamId(undefined)}
+        >
+          <Ionicons name="person-outline" size={16} color={theme.colors.text} />
+          <Text style={styles.optionText}>Pessoal</Text>
+        </TouchableOpacity>
+        {teams.map((team) => (
+          <TouchableOpacity
+            key={team.id}
+            style={[
+              styles.option,
+              teamId === team.id && styles.selectedOption,
+              { borderColor: Colors.info }
+            ]}
+            onPress={() => setTeamId(team.id)}
+          >
+            <Ionicons name="people" size={16} color={Colors.info} />
+            <Text style={styles.optionText}>{team.name}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -468,6 +511,7 @@ export default function TaskFormScreen() {
         {isEditing && renderStatusSelector()}
         {renderCategorySelector()}
         {renderProjectSelector()}
+        {renderTeamSelector()}
         {isEditing && renderProgressSelector()}
         {renderRecurringSelector()}
 

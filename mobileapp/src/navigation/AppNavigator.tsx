@@ -24,6 +24,8 @@ import NotificationSettingsScreen from '../screens/settings/NotificationSettings
 import EditProfileScreen from '../screens/settings/EditProfileScreen';
 import ExportScreen from '../screens/settings/ExportScreen';
 import { NotificationHandler } from '../components/NotificationHandler';
+import { TeamsScreen } from '../screens/TeamsScreen';
+import TeamDetailsScreen from '../screens/TeamDetailsScreen';
 
 export type RootStackParamList = {
   Auth: undefined;
@@ -35,6 +37,7 @@ export type RootStackParamList = {
   TaskDetails: { taskId: string };
   ProjectForm: { projectId?: string };
   ProjectDetail: { projectId: string };
+  TeamDetails: { teamId: string };
   ThemeSettings: undefined;
   NotificationSettings: undefined;
   EditProfile: undefined;
@@ -45,6 +48,7 @@ export type MainTabParamList = {
   Home: undefined;
   Tasks: undefined;
   Projects: undefined;
+  Teams: undefined;
   Settings: undefined;
 };
 
@@ -115,6 +119,9 @@ const MainTabs = () => {
             case 'Projects':
               iconName = focused ? 'briefcase' : 'briefcase-outline';
               break;
+            case 'Teams':
+              iconName = focused ? 'people' : 'people-outline';
+              break;
             case 'Settings':
               iconName = focused ? 'settings' : 'settings-outline';
               break;
@@ -153,6 +160,11 @@ const MainTabs = () => {
         name="Projects"
         component={ProjectListScreen}
         options={{ title: 'Projetos' }}
+      />
+      <Tab.Screen
+        name="Teams"
+        component={TeamsScreen}
+        options={{ title: 'Equipes' }}
       />
       <Tab.Screen
         name="Settings"
@@ -248,6 +260,24 @@ const MainStack = () => {
         component={ProjectDetailScreen}
         options={({ navigation }) => ({
           title: 'Detalhes do Projeto',
+          headerTintColor: '#007AFF',
+          headerStyle: {
+            backgroundColor: '#F2F2F7',
+            borderBottomWidth: 1,
+            borderBottomColor: '#C6C6C8',
+          },
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            color: '#000000',
+          },
+          headerLeft: ({ canGoBack }) => <CustomBackButton canGoBack={canGoBack} navigation={navigation} />,
+        })}
+      />
+      <Stack.Screen
+        name="TeamDetails"
+        component={TeamDetailsScreen}
+        options={({ navigation }) => ({
+          title: 'Detalhes da Equipe',
           headerTintColor: '#007AFF',
           headerStyle: {
             backgroundColor: '#F2F2F7',
