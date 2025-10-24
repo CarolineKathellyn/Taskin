@@ -230,16 +230,42 @@ class NotificationService {
   }
 
   async scheduleTaskReminder(taskTitle: string, dueDate: Date, taskId: string): Promise<string | null> {
-    const reminderDate = new Date(dueDate);
-    reminderDate.setHours(reminderDate.getHours() - 1);
+    // Parse the due date and set to end of day to avoid midnight issues
+    const dueDateObj = new Date(dueDate);
+    dueDateObj.setHours(23, 59, 59, 999);
 
-    if (reminderDate <= new Date()) {
+    // Calculate days until due
+    const now = new Date();
+    const daysUntilDue = Math.ceil((dueDateObj.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Don't schedule if already past due
+    if (daysUntilDue < 0) {
       return null;
+    }
+
+    // Schedule reminder 1 day before at 9 AM, or same day at 9 AM if due tomorrow
+    const reminderDate = new Date(dueDateObj);
+    reminderDate.setDate(reminderDate.getDate() - 1);
+    reminderDate.setHours(9, 0, 0, 0);
+
+    // If reminder date is in the past, schedule for today at current time + 1 minute
+    if (reminderDate <= now) {
+      reminderDate.setTime(now.getTime() + 60000); // 1 minute from now
+    }
+
+    // Create appropriate message based on days remaining
+    let message: string;
+    if (daysUntilDue === 0) {
+      message = `"${taskTitle}" vence hoje`;
+    } else if (daysUntilDue === 1) {
+      message = `"${taskTitle}" vence amanhã`;
+    } else {
+      message = `"${taskTitle}" vence em ${daysUntilDue} dias`;
     }
 
     return this.scheduleLocalNotification({
       title: 'Lembrete de Tarefa',
-      body: `"${taskTitle}" vence em 1 hora`,
+      body: message,
       data: { taskId, type: 'task_reminder' },
       trigger: { date: reminderDate }
     });
