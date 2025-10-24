@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { TeamState, Team, TeamMember } from '../../types';
 import { teamService, TeamRequest, TeamResponse, TeamMemberResponse, AddMemberRequest } from '../../services/teamService';
+import { DatabaseService } from '../../services/database/DatabaseService';
 
 const initialState: TeamState = {
   teams: [],
@@ -18,7 +19,6 @@ export const fetchUserTeams = createAsyncThunk(
       const teams = await teamService.getUserTeams();
 
       // Save team members to local database for each team
-      const { DatabaseService } = await import('../../services/database/DatabaseService');
       const dbService = DatabaseService.getInstance();
       await dbService.initializeDatabase();
 
@@ -94,7 +94,6 @@ export const fetchTeamMembers = createAsyncThunk(
       const members = await teamService.getTeamMembers(teamId);
 
       // Save members to local database for team task queries
-      const { DatabaseService } = await import('../../services/database/DatabaseService');
       const dbService = DatabaseService.getInstance();
       await dbService.initializeDatabase();
       await dbService.saveTeamMembers(teamId, members);
@@ -114,7 +113,6 @@ export const addTeamMember = createAsyncThunk(
 
       // Refresh team members in local database
       const members = await teamService.getTeamMembers(teamId);
-      const { DatabaseService } = await import('../../services/database/DatabaseService');
       const dbService = DatabaseService.getInstance();
       await dbService.initializeDatabase();
       await dbService.saveTeamMembers(teamId, members);
@@ -134,7 +132,6 @@ export const removeTeamMember = createAsyncThunk(
 
       // Refresh team members in local database
       const members = await teamService.getTeamMembers(teamId);
-      const { DatabaseService } = await import('../../services/database/DatabaseService');
       const dbService = DatabaseService.getInstance();
       await dbService.initializeDatabase();
       await dbService.saveTeamMembers(teamId, members);

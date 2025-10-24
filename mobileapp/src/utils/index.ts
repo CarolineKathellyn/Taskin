@@ -1,6 +1,8 @@
 // Utility functions following Single Responsibility Principle
 
 import { TaskinError } from '../types';
+import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Date utilities
 export class DateUtils {
@@ -193,8 +195,7 @@ export class StringUtils {
 export class StorageUtils {
   static async setSecureItem(key: string, value: string): Promise<void> {
     try {
-      const { setItemAsync } = await import('expo-secure-store');
-      await setItemAsync(key, value);
+      await SecureStore.setItemAsync(key, value);
     } catch (error) {
       throw new TaskinError(`Erro ao salvar ${key}`, 'STORAGE_ERROR');
     }
@@ -202,8 +203,7 @@ export class StorageUtils {
 
   static async getSecureItem(key: string): Promise<string | null> {
     try {
-      const { getItemAsync } = await import('expo-secure-store');
-      return await getItemAsync(key);
+      return await SecureStore.getItemAsync(key);
     } catch (error) {
       console.warn(`Erro ao buscar ${key}:`, error);
       return null;
@@ -212,8 +212,7 @@ export class StorageUtils {
 
   static async removeSecureItem(key: string): Promise<void> {
     try {
-      const { deleteItemAsync } = await import('expo-secure-store');
-      await deleteItemAsync(key);
+      await SecureStore.deleteItemAsync(key);
     } catch (error) {
       throw new TaskinError(`Erro ao remover ${key}`, 'STORAGE_ERROR');
     }
@@ -221,8 +220,7 @@ export class StorageUtils {
 
   static async setAsyncStorageItem(key: string, value: string): Promise<void> {
     try {
-      const AsyncStorage = await import('@react-native-async-storage/async-storage');
-      await AsyncStorage.default.setItem(key, value);
+      await AsyncStorage.setItem(key, value);
     } catch (error) {
       throw new TaskinError(`Erro ao salvar ${key}`, 'STORAGE_ERROR');
     }
@@ -230,8 +228,7 @@ export class StorageUtils {
 
   static async getAsyncStorageItem(key: string): Promise<string | null> {
     try {
-      const AsyncStorage = await import('@react-native-async-storage/async-storage');
-      return await AsyncStorage.default.getItem(key);
+      return await AsyncStorage.getItem(key);
     } catch (error) {
       console.warn(`Erro ao buscar ${key}:`, error);
       return null;

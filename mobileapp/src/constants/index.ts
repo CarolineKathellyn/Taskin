@@ -132,7 +132,7 @@ export const Strings = {
 
 export const Config = {
   // API
-  apiBaseUrl: __DEV__ ? 'http://10.0.2.2:8080/api' : 'https://api.taskin.app',
+  apiBaseUrl: 'http://192.168.1.10:8080/api',
   apiTimeout: 10000,
 
   // Storage Keys
