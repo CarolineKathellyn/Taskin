@@ -424,6 +424,7 @@ export class DatabaseService implements IDatabaseService {
     const updatedTask: Task = {
       ...existingTask,
       ...updates,
+      version: (existingTask.version || 0) + 1, // Increment version on every update
       updatedAt: DateUtils.getCurrentISOString(),
     };
 
@@ -434,11 +435,11 @@ export class DatabaseService implements IDatabaseService {
     }
 
     try {
-      console.log(`UpdateTask: Executing database update for task ID: ${id}, team_id: ${updatedTask.teamId || 'null'}`);
+      console.log(`UpdateTask: Executing database update for task ID: ${id}, team_id: ${updatedTask.teamId || 'null'}, version: ${updatedTask.version}`);
       await this.db.runAsync(
         `UPDATE tasks SET title = ?, description = ?, notes = ?, priority = ?, status = ?, due_date = ?,
          category_id = ?, project_id = ?, team_id = ?, progress_percentage = ?, updated_at = ?, completed_at = ?,
-         is_recurring = ?, recurrence_pattern = ?, parent_task_id = ?, attachments = ? WHERE id = ?`,
+         is_recurring = ?, recurrence_pattern = ?, parent_task_id = ?, attachments = ?, version = ? WHERE id = ?`,
         [
           updatedTask.title,
           updatedTask.description || null,
@@ -456,6 +457,7 @@ export class DatabaseService implements IDatabaseService {
           updatedTask.recurrencePattern || null,
           updatedTask.parentTaskId || null,
           updatedTask.attachments ? JSON.stringify(updatedTask.attachments) : null,
+          updatedTask.version,
           id,
         ]
       );

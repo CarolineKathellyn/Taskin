@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { RootState, AppDispatch } from '../../store';
 import { loadTasks, processRecurringTasks } from '../../store/slices/taskAsyncThunks';
+import { performDeltaSync } from '../../store/slices/syncSlice';
 import { Colors, Strings } from '../../constants';
 import { DateUtils } from '../../utils';
 import { useTheme, Theme } from '../../contexts/ThemeContext';
@@ -34,6 +35,16 @@ export default function HomeScreen() {
     if (!user) return;
 
     try {
+      // Try to sync with server (will fail silently if no internet)
+      try {
+        console.log('HomeScreen: Attempting to sync with server...');
+        await dispatch(performDeltaSync()).unwrap();
+        console.log('HomeScreen: Sync complete');
+      } catch (syncError) {
+        console.log('HomeScreen: Sync failed (may be offline), continuing with local data');
+        // Continue with local data even if sync fails
+      }
+
       // Load tasks first
       await dispatch(loadTasks(user.id));
 

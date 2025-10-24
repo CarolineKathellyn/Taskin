@@ -21,19 +21,31 @@ class BackgroundSyncService {
     console.log('[BackgroundSync] Starting background sync service');
     this.isRunning = true;
 
-    // Initial sync
-    this.performSync();
+    // Initial sync (non-blocking)
+    this.performSync().catch(error => {
+      console.error('[BackgroundSync] Initial sync failed:', error);
+    });
 
     // Set up periodic sync
     this.syncInterval = setInterval(() => {
-      this.performSync();
+      this.performSync().catch(error => {
+        console.error('[BackgroundSync] Periodic sync failed:', error);
+      });
     }, this.syncIntervalMs);
 
     // Listen to app state changes
-    this.appStateSubscription = AppState.addEventListener('change', this.handleAppStateChange);
+    try {
+      this.appStateSubscription = AppState.addEventListener('change', this.handleAppStateChange);
+    } catch (error) {
+      console.error('[BackgroundSync] Failed to add app state listener:', error);
+    }
 
     // Listen to network changes
-    NetInfo.addEventListener(this.handleNetworkChange);
+    try {
+      NetInfo.addEventListener(this.handleNetworkChange);
+    } catch (error) {
+      console.error('[BackgroundSync] Failed to add network listener:', error);
+    }
   }
 
   /**
@@ -110,7 +122,9 @@ class BackgroundSyncService {
   private handleAppStateChange = (nextAppState: AppStateStatus) => {
     if (nextAppState === 'active') {
       console.log('[BackgroundSync] App became active, performing sync');
-      this.performSync();
+      this.performSync().catch(error => {
+        console.error('[BackgroundSync] App state change sync failed:', error);
+      });
     } else if (nextAppState === 'background') {
       console.log('[BackgroundSync] App went to background');
     }
@@ -122,7 +136,9 @@ class BackgroundSyncService {
   private handleNetworkChange = (state: any) => {
     if (state.isConnected) {
       console.log('[BackgroundSync] Network connected, performing sync');
-      this.performSync();
+      this.performSync().catch(error => {
+        console.error('[BackgroundSync] Network change sync failed:', error);
+      });
     } else {
       console.log('[BackgroundSync] Network disconnected');
     }

@@ -62,7 +62,7 @@ export const ProjectIcons = [
 
 export const Strings = {
   // App
-  appName: 'Taskin',
+  appName: 'Taskina',
   appDescription: 'Gerenciador de Tarefas Offline',
 
   // Authentication

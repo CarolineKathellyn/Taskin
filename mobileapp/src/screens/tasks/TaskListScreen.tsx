@@ -9,6 +9,7 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import { RootState, AppDispatch } from '../../store';
 import { loadTasks, deleteTask, processRecurringTasks } from '../../store/slices/taskAsyncThunks';
 import { loadProjects } from '../../store/slices/projectAsyncThunks';
+import { performDeltaSync } from '../../store/slices/syncSlice';
 import { updateFilters, clearFilters, setFilters } from '../../store/slices/taskSlice';
 import { Button, Card, LoadingSpinner } from '../../components/common';
 import TaskFilters from '../../components/tasks/TaskFilters';
@@ -41,6 +42,16 @@ export default function TaskListScreen() {
     if (!user) return;
 
     try {
+      // Try to sync with server (will fail silently if no internet)
+      try {
+        console.log('TaskListScreen: Attempting to sync with server...');
+        await dispatch(performDeltaSync()).unwrap();
+        console.log('TaskListScreen: Sync complete');
+      } catch (syncError) {
+        console.log('TaskListScreen: Sync failed (may be offline), continuing with local data');
+        // Continue with local data even if sync fails
+      }
+
       // Load all data first
       await Promise.all([
         dispatch(loadTasks(user.id)),

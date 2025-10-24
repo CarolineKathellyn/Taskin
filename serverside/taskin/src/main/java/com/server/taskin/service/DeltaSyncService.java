@@ -3,7 +3,9 @@ package com.server.taskin.service;
 import com.server.taskin.dto.DeltaSyncRequest;
 import com.server.taskin.dto.DeltaSyncResponse;
 import com.server.taskin.model.SyncLog;
+import com.server.taskin.model.SharedTask;
 import com.server.taskin.repository.SyncLogRepository;
+import com.server.taskin.repository.SharedTaskRepository;
 import com.server.taskin.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,9 @@ public class DeltaSyncService {
 
     @Autowired
     private SyncLogRepository syncLogRepository;
+
+    @Autowired
+    private SharedTaskRepository sharedTaskRepository;
 
     @Autowired
     private TeamService teamService;
@@ -84,6 +89,26 @@ public class DeltaSyncService {
                         clientChange.getData()
                     );
                     syncLogRepository.save(syncLog);
+
+                    // If this is a task with a teamId, add it to shared_tasks table
+                    if ("task".equals(clientChange.getEntityType()) && teamId != null && !teamId.isEmpty()) {
+                        if ("create".equals(clientChange.getAction()) || "update".equals(clientChange.getAction())) {
+                            // Check if entry already exists
+                            if (!sharedTaskRepository.existsByTaskIdAndTeamId(clientChange.getEntityId(), teamId)) {
+                                SharedTask sharedTask = new SharedTask(
+                                    clientChange.getEntityId(),
+                                    teamId,
+                                    userId
+                                );
+                                sharedTaskRepository.save(sharedTask);
+                                System.out.println("Added task " + clientChange.getEntityId() + " to shared_tasks for team " + teamId);
+                            }
+                        } else if ("delete".equals(clientChange.getAction())) {
+                            // Remove from shared_tasks if task is deleted
+                            sharedTaskRepository.deleteByTaskIdAndTeamId(clientChange.getEntityId(), teamId);
+                            System.out.println("Removed task " + clientChange.getEntityId() + " from shared_tasks for team " + teamId);
+                        }
+                    }
 
                 } catch (Exception e) {
                     // Log error but continue processing

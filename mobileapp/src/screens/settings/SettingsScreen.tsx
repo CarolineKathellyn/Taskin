@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { AppDispatch, RootState } from '../../store';
 import { logoutUser } from '../../store/slices/authSlice';
+import { performDeltaSync } from '../../store/slices/syncSlice';
 import { Button, Card, Input } from '../../components/common';
 import { Colors, Strings } from '../../constants';
 import { useTheme, Theme } from '../../contexts/ThemeContext';
@@ -59,6 +60,7 @@ export default function SettingsScreen() {
   const navigation = useNavigation<SettingsScreenNavigationProp>();
   const insets = useSafeAreaInsets();
   const { user } = useSelector((state: RootState) => state.auth);
+  const { sync: syncState } = useSelector((state: RootState) => state);
   const { theme, toggleTheme } = useTheme();
   const styles = getStyles(theme);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -104,6 +106,23 @@ export default function SettingsScreen() {
     );
   };
 
+  const handleManualSync = async () => {
+    try {
+      await dispatch(performDeltaSync()).unwrap();
+      Alert.alert(
+        'Sucesso',
+        `Sincronização concluída!\n\nÚltima sincronização: ${syncState.lastSyncAt || 'Nunca'}\nMudanças pendentes: ${syncState.pendingChanges}`,
+        [{ text: 'OK' }]
+      );
+    } catch (error: any) {
+      Alert.alert(
+        'Erro na Sincronização',
+        error.message || 'Não foi possível sincronizar os dados. Verifique sua conexão e tente novamente.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}>
       {/* User Profile Section */}
@@ -145,13 +164,20 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Dados</Text>
         <Card>
-          {/* <SettingItem
+          <SettingItem
             icon="cloud-upload-outline"
             title="Sincronizar Dados"
-            subtitle="Enviar dados para o servidor"
-            onPress={() => Alert.alert('Em breve', 'Sincronização manual será implementada.')}
+            subtitle={syncState.isSyncing ? 'Sincronizando...' : `Última sincronização: ${syncState.lastSyncAt || 'Nunca'}`}
+            onPress={handleManualSync}
+            rightElement={
+              syncState.pendingChanges > 0 ? (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{syncState.pendingChanges}</Text>
+                </View>
+              ) : null
+            }
           />
-          <View style={styles.separator} /> */}
+          <View style={styles.separator} />
           <SettingItem
             icon="document-text-outline"
             title="Exportar para PDF"
@@ -296,5 +322,19 @@ const getStyles = (theme: Theme) => StyleSheet.create({
     fontSize: 12,
     color: theme.colors.textSecondary,
     textAlign: 'center',
+  },
+  badge: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    minWidth: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
