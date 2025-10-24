@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Card } from '../../components/common';
@@ -35,13 +36,14 @@ const themeOptions: ThemeOption[] = [
 
 export default function ThemeSettingsScreen() {
   const { theme, themeMode, setThemeMode } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const handleThemeSelect = (mode: ThemeMode) => {
     setThemeMode(mode);
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]} contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}>
       <Text style={[styles.description, { color: theme.colors.textSecondary }]}>
         Escolha como você prefere ver o aplicativo. O tema pode ser alterado a qualquer momento.
       </Text>

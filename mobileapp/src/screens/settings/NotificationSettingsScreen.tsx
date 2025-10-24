@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Card, Button } from '../../components/common';
-import { Colors, Config } from '../../constants';
+import { Config } from '../../constants';
 import { useNotifications } from '../../hooks/useNotifications';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 interface NotificationSettings {
   taskReminders: boolean;
@@ -26,6 +28,9 @@ const DEFAULT_SETTINGS: NotificationSettings = {
 
 export default function NotificationSettingsScreen() {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
   const { expoPushToken, cancelAllNotifications, reloadSettings } = useNotifications();
   const [settings, setSettings] = useState<NotificationSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
@@ -93,28 +98,10 @@ export default function NotificationSettingsScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}>
       <Card style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="notifications" size={24} color={Colors.primary} />
-          <Text style={styles.sectionTitle}>Status das Notificações</Text>
-        </View>
-        <View style={styles.statusContainer}>
-          <Text style={styles.statusLabel}>Token Push:</Text>
-          <Text style={styles.statusValue}>
-            {expoPushToken ? '✅ Configurado' : '❌ Não configurado'}
-          </Text>
-        </View>
-        {expoPushToken && (
-          <Text style={styles.tokenText} numberOfLines={2}>
-            {expoPushToken}
-          </Text>
-        )}
-      </Card>
-
-      <Card style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />
+          <Ionicons name="checkmark-circle" size={24} color={theme.colors.primary} />
           <Text style={styles.sectionTitle}>Tarefas</Text>
         </View>
 
@@ -128,8 +115,8 @@ export default function NotificationSettingsScreen() {
           <Switch
             value={settings.taskReminders}
             onValueChange={(value) => updateSetting('taskReminders', value)}
-            trackColor={{ false: Colors.border, true: Colors.primary + '40' }}
-            thumbColor={settings.taskReminders ? Colors.primary : Colors.textSecondary}
+            trackColor={{ false: theme.colors.border, true: theme.colors.primary + '40' }}
+            thumbColor={settings.taskReminders ? theme.colors.primary : theme.colors.disabled}
           />
         </View>
 
@@ -143,15 +130,15 @@ export default function NotificationSettingsScreen() {
           <Switch
             value={settings.taskCompletions}
             onValueChange={(value) => updateSetting('taskCompletions', value)}
-            trackColor={{ false: Colors.border, true: Colors.primary + '40' }}
-            thumbColor={settings.taskCompletions ? Colors.primary : Colors.textSecondary}
+            trackColor={{ false: theme.colors.border, true: theme.colors.primary + '40' }}
+            thumbColor={settings.taskCompletions ? theme.colors.primary : theme.colors.disabled}
           />
         </View>
       </Card>
 
       <Card style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="folder" size={24} color={Colors.primary} />
+          <Ionicons name="folder" size={24} color={theme.colors.primary} />
           <Text style={styles.sectionTitle}>Projetos</Text>
         </View>
 
@@ -165,8 +152,8 @@ export default function NotificationSettingsScreen() {
           <Switch
             value={settings.projectDeadlines}
             onValueChange={(value) => updateSetting('projectDeadlines', value)}
-            trackColor={{ false: Colors.border, true: Colors.primary + '40' }}
-            thumbColor={settings.projectDeadlines ? Colors.primary : Colors.textSecondary}
+            trackColor={{ false: theme.colors.border, true: theme.colors.primary + '40' }}
+            thumbColor={settings.projectDeadlines ? theme.colors.primary : theme.colors.disabled}
           />
         </View>
 
@@ -180,15 +167,15 @@ export default function NotificationSettingsScreen() {
           <Switch
             value={settings.projectCompletions}
             onValueChange={(value) => updateSetting('projectCompletions', value)}
-            trackColor={{ false: Colors.border, true: Colors.primary + '40' }}
-            thumbColor={settings.projectCompletions ? Colors.primary : Colors.textSecondary}
+            trackColor={{ false: theme.colors.border, true: theme.colors.primary + '40' }}
+            thumbColor={settings.projectCompletions ? theme.colors.primary : theme.colors.disabled}
           />
         </View>
       </Card>
 
       <Card style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="settings" size={24} color={Colors.primary} />
+          <Ionicons name="settings" size={24} color={theme.colors.primary} />
           <Text style={styles.sectionTitle}>Gerenciar</Text>
         </View>
 
@@ -203,15 +190,15 @@ export default function NotificationSettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     padding: 16,
   },
   loadingText: {
     textAlign: 'center',
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     marginTop: 32,
   },
   section: {
@@ -225,7 +212,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 12,
   },
   statusContainer: {
@@ -236,18 +223,18 @@ const styles = StyleSheet.create({
   },
   statusLabel: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
   },
   statusValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   tokenText: {
     fontSize: 10,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     marginTop: 8,
-    backgroundColor: Colors.border + '40',
+    backgroundColor: theme.colors.border + '40',
     padding: 8,
     borderRadius: 4,
     fontFamily: 'monospace',
@@ -258,7 +245,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border + '40',
+    borderBottomColor: theme.colors.border + '40',
   },
   settingInfo: {
     flex: 1,
@@ -267,12 +254,12 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 4,
   },
   settingDescription: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
   },
   clearButton: {
     marginTop: 8,

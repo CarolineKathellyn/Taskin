@@ -326,6 +326,7 @@ export interface TaskFilters {
   priority?: TaskPriority;
   categoryId?: string;
   projectId?: string;
+  teamId?: string;
   searchTerm?: string;
   dateRange?: 'today' | 'this_week' | 'this_month' | 'overdue';
   completedFilter?: 'all' | 'completed' | 'pending';

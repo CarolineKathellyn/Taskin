@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch } f
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -56,6 +57,7 @@ type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Set
 export default function SettingsScreen() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<SettingsScreenNavigationProp>();
+  const insets = useSafeAreaInsets();
   const { user } = useSelector((state: RootState) => state.auth);
   const { theme, toggleTheme } = useTheme();
   const styles = getStyles(theme);
@@ -103,7 +105,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}>
       {/* User Profile Section */}
       <Card style={styles.profileCard}>
         <View style={styles.profileHeader}>
@@ -143,13 +145,13 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Dados</Text>
         <Card>
-          <SettingItem
+          {/* <SettingItem
             icon="cloud-upload-outline"
             title="Sincronizar Dados"
             subtitle="Enviar dados para o servidor"
             onPress={() => Alert.alert('Em breve', 'Sincronização manual será implementada.')}
           />
-          <View style={styles.separator} />
+          <View style={styles.separator} /> */}
           <SettingItem
             icon="document-text-outline"
             title="Exportar para PDF"
@@ -168,13 +170,13 @@ export default function SettingsScreen() {
             subtitle="Versão e informações"
             onPress={handleAbout}
           />
-          <View style={styles.separator} />
+          {/* <View style={styles.separator} />
           <SettingItem
             icon="help-circle-outline"
             title="Ajuda e Suporte"
             subtitle="Obter ajuda"
             onPress={() => Alert.alert('Em breve', 'Central de ajuda será implementada.')}
-          />
+          /> */}
         </Card>
       </View>
 

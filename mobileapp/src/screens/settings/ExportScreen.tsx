@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, Switch } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { RootState } from '../../store';
@@ -11,6 +12,7 @@ import PDFExportService, { PDFExportOptions } from '../../services/PDFExportServ
 
 export default function ExportScreen() {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const styles = getStyles(theme);
 
@@ -82,7 +84,7 @@ export default function ExportScreen() {
   const inProgressCount = tasks.filter(t => t.status === 'em_progresso').length;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}>
       <View style={styles.content}>
         <View style={styles.header}>
           <Ionicons name="document-text" size={48} color={theme.colors.primary} />

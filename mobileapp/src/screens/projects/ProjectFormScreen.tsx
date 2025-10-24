@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { RootStackParamList } from '../../navigation/AppNavigator';
@@ -20,6 +21,7 @@ export default function ProjectFormScreen() {
   const route = useRoute<ProjectFormRouteProp>();
   const dispatch = useDispatch<AppDispatch>();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = getStyles(theme);
   const { projects, isLoading } = useSelector((state: RootState) => state.tasks);
   const { teams } = useSelector((state: RootState) => state.teams);
@@ -231,7 +233,7 @@ export default function ProjectFormScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}>
         <View style={styles.form}>
           <Input
             label="Nome do projeto *"

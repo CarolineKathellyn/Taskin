@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Ale
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 
@@ -19,6 +20,7 @@ export default function EditProfileScreen() {
   const navigation = useNavigation<EditProfileScreenNavigationProp>();
   const dispatch = useDispatch<AppDispatch>();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = getStyles(theme);
   const { user, isLoading } = useSelector((state: RootState) => state.auth);
 
@@ -162,7 +164,7 @@ export default function EditProfileScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}>
         <View style={styles.form}>
           <Text style={styles.title}>Editar Perfil</Text>
           <Text style={styles.subtitle}>

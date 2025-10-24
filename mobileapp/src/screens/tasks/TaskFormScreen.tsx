@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { RootStackParamList } from '../../navigation/AppNavigator';
@@ -28,6 +29,7 @@ export default function TaskFormScreen() {
   const { user } = useSelector((state: RootState) => state.auth);
   const { scheduleTaskReminder, notifyTaskCompleted } = useNotifications();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = getStyles(theme);
 
   const taskId = route.params?.taskId;
@@ -468,7 +470,7 @@ export default function TaskFormScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}>
         <Input
           label={Strings.taskTitle}
           placeholder="Digite o título da tarefa"

@@ -20,6 +20,7 @@ import {
   removeTeamMember,
   clearTeamsError,
 } from '../store/slices/teamsSlice';
+import { useTheme, Theme } from '../contexts/ThemeContext';
 
 interface TeamDetailsScreenProps {
   route: {
@@ -35,6 +36,8 @@ export const TeamDetailsScreen = ({ route, navigation }: TeamDetailsScreenProps)
   const dispatch = useDispatch<AppDispatch>();
   const { teams, members, isLoading, error } = useSelector((state: RootState) => state.teams);
   const { user } = useSelector((state: RootState) => state.auth);
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
   const [modalVisible, setModalVisible] = useState(false);
   const [memberEmail, setMemberEmail] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -117,7 +120,7 @@ export const TeamDetailsScreen = ({ route, navigation }: TeamDetailsScreenProps)
   const renderMemberItem = ({ item }: any) => (
     <View style={styles.memberCard}>
       <View style={styles.memberInfo}>
-        <Ionicons name="person-circle" size={40} color="#007AFF" />
+        <Ionicons name="person-circle" size={40} color={theme.colors.primary} />
         <View style={styles.memberDetails}>
           <Text style={styles.memberName}>{item.name || 'Usuário'}</Text>
           <Text style={styles.memberEmail}>{item.email}</Text>
@@ -133,7 +136,7 @@ export const TeamDetailsScreen = ({ route, navigation }: TeamDetailsScreenProps)
             style={styles.removeButton}
             onPress={() => handleRemoveMember(item.userId, item.name || item.email)}
           >
-            <Ionicons name="close-circle" size={24} color="#FF3B30" />
+            <Ionicons name="close-circle" size={24} color={theme.colors.danger} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -143,7 +146,7 @@ export const TeamDetailsScreen = ({ route, navigation }: TeamDetailsScreenProps)
   if (!team) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -170,13 +173,13 @@ export const TeamDetailsScreen = ({ route, navigation }: TeamDetailsScreenProps)
               style={styles.addButton}
               onPress={() => setModalVisible(true)}
             >
-              <Ionicons name="person-add" size={20} color="#007AFF" />
+              <Ionicons name='person-add' size={20} color={theme.colors.primary} />
             </TouchableOpacity>
           )}
         </View>
 
         {isLoading && members.length === 0 ? (
-          <ActivityIndicator size="small" color="#007AFF" style={{ marginVertical: 20 }} />
+          <ActivityIndicator size='small' color={theme.colors.primary} style={{ marginVertical: 20 }} />
         ) : members.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Nenhum membro ainda</Text>
@@ -206,7 +209,7 @@ export const TeamDetailsScreen = ({ route, navigation }: TeamDetailsScreenProps)
           }}
         >
           <Text style={styles.viewTasksButtonText}>Ver Tarefas da Equipe</Text>
-          <Ionicons name="chevron-forward" size={20} color="#007AFF" />
+          <Ionicons name='chevron-forward' size={20} color={theme.colors.primary} />
         </TouchableOpacity>
         <Text style={styles.infoText}>
           Para compartilhar uma tarefa com esta equipe, edite a tarefa e selecione esta equipe.
@@ -216,7 +219,7 @@ export const TeamDetailsScreen = ({ route, navigation }: TeamDetailsScreenProps)
       {/* Add Member Modal */}
       <Modal
         visible={modalVisible}
-        animationType="slide"
+        animationType='slide'
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
@@ -226,11 +229,11 @@ export const TeamDetailsScreen = ({ route, navigation }: TeamDetailsScreenProps)
 
             <TextInput
               style={styles.input}
-              placeholder="Email do membro"
+              placeholder='Email do membro'
               value={memberEmail}
               onChangeText={setMemberEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
+              keyboardType='email-address'
+              autoCapitalize='none'
             />
 
             <View style={styles.modalButtons}>
@@ -259,10 +262,10 @@ export const TeamDetailsScreen = ({ route, navigation }: TeamDetailsScreenProps)
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: theme.colors.background,
   },
   centerContainer: {
     flex: 1,
@@ -270,24 +273,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.card,
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: theme.colors.border,
   },
   teamName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: theme.colors.text,
     marginBottom: 8,
   },
   teamDescription: {
     fontSize: 16,
-    color: '#666',
+    color: theme.colors.textSecondary,
     marginBottom: 12,
   },
   badge: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: theme.colors.primary + '20',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -295,11 +298,11 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 12,
-    color: '#1976D2',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   section: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.card,
     marginTop: 16,
     padding: 20,
   },
@@ -312,7 +315,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: theme.colors.text,
   },
   addButton: {
     padding: 8,
@@ -323,7 +326,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#999',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   memberCard: {
@@ -347,18 +350,18 @@ const styles = StyleSheet.create({
   memberName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: theme.colors.text,
   },
   memberEmail: {
     fontSize: 14,
-    color: '#666',
+    color: theme.colors.textSecondary,
     marginTop: 2,
   },
   memberActions: {
     marginLeft: 12,
   },
   ownerBadge: {
-    backgroundColor: '#FFD700',
+    backgroundColor: '#FFD700', // Gold color for owner
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -375,7 +378,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F0F8FF',
+    backgroundColor: theme.colors.surface,
     padding: 16,
     borderRadius: 8,
     marginBottom: 12,
@@ -383,11 +386,11 @@ const styles = StyleSheet.create({
   viewTasksButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#007AFF',
+    color: theme.colors.primary,
   },
   infoText: {
     fontSize: 13,
-    color: '#666',
+    color: theme.colors.textSecondary,
     lineHeight: 18,
   },
   modalOverlay: {
@@ -397,7 +400,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.card,
     borderRadius: 16,
     padding: 24,
     width: '85%',
@@ -406,12 +409,12 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: theme.colors.text,
     marginBottom: 20,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: theme.colors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
@@ -429,19 +432,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: theme.colors.surface,
     marginRight: 8,
   },
   cancelButtonText: {
-    color: '#666',
+    color: theme.colors.textSecondary,
     fontWeight: '600',
   },
   submitButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.primary,
     marginLeft: 8,
   },
   submitButtonText: {
-    color: '#FFFFFF',
+    color: theme.colors.card,
     fontWeight: '600',
   },
 });

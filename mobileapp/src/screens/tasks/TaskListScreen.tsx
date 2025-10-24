@@ -24,6 +24,7 @@ export default function TaskListScreen() {
   const navigation = useNavigation<TaskListNavigationProp>();
   const dispatch = useDispatch<AppDispatch>();
   const { tasks, projects, isLoading, error, filters } = useSelector((state: RootState) => state.tasks);
+  const { teams } = useSelector((state: RootState) => state.teams);
   const { user } = useSelector((state: RootState) => state.auth);
   const [refreshing, setRefreshing] = useState(false);
   const { theme } = useTheme();
@@ -117,6 +118,11 @@ export default function TaskListScreen() {
     // Filter by project
     if (filters.projectId) {
       filtered = filtered.filter(task => task.projectId === filters.projectId);
+    }
+
+    // Filter by team
+    if (filters.teamId) {
+      filtered = filtered.filter(task => task.teamId === filters.teamId);
     }
 
     // Filter by date range
@@ -363,8 +369,9 @@ export default function TaskListScreen() {
             filters={filters}
             onFiltersChange={handleFiltersChange}
             projects={projects}
+            teams={teams}
           />
-          <TouchableOpacity onPress={handleExportTasks} style={styles.exportButton}>
+          <TouchableOpacity onPress={() => navigation.navigate('Export')} style={styles.exportButton}>
             <Ionicons name="download-outline" size={20} color={theme.colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleCreateTask} style={styles.addButton}>
@@ -416,6 +423,7 @@ export default function TaskListScreen() {
             {filters.priority && ` • ${TaskPriorities[filters.priority].label}`}
             {filters.categoryId && ` • ${categories.find(c => c.id === filters.categoryId)?.name || 'Categoria'}`}
             {filters.projectId && ` • ${projects.find(p => p.id === filters.projectId)?.name || 'Projeto'}`}
+            {filters.teamId && ` • ${teams.find(t => t.id === filters.teamId)?.name || 'Equipe'}`}
           </Text>
           <TouchableOpacity onPress={() => dispatch(clearFilters())}>
             <Text style={styles.clearFilters}>Limpar</Text>

@@ -19,10 +19,13 @@ import {
   clearTeamsError,
 } from '../store/slices/teamsSlice';
 import { TeamRequest } from '../services/teamService';
+import { useTheme, Theme } from '../contexts/ThemeContext';
 
 export const TeamsScreen = ({ navigation }: any) => {
   const dispatch = useDispatch<AppDispatch>();
   const { teams, isLoading, error } = useSelector((state: RootState) => state.teams);
+  const { theme } = useTheme();
+  const styles = getStyles(theme);
   const [modalVisible, setModalVisible] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [teamDescription, setTeamDescription] = useState('');
@@ -119,7 +122,7 @@ export const TeamsScreen = ({ navigation }: any) => {
   if (isLoading && teams.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -208,10 +211,10 @@ export const TeamsScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: theme.colors.background,
   },
   centerContainer: {
     flex: 1,
@@ -220,9 +223,9 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: theme.colors.border,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -230,27 +233,27 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: theme.colors.text,
   },
   createButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
   },
   createButtonText: {
-    color: '#FFFFFF',
+    color: theme.colors.background,
     fontWeight: '600',
   },
   listContainer: {
     padding: 16,
   },
   teamCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: theme.colors.dark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -265,23 +268,23 @@ const styles = StyleSheet.create({
   teamName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: theme.colors.text,
     flex: 1,
   },
   roleBadge: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: theme.colors.primary + '20',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
   roleText: {
     fontSize: 12,
-    color: '#1976D2',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   teamDescription: {
     fontSize: 14,
-    color: '#666',
+    color: theme.colors.textSecondary,
     marginBottom: 12,
   },
   teamFooter: {
@@ -291,14 +294,14 @@ const styles = StyleSheet.create({
   },
   memberCount: {
     fontSize: 14,
-    color: '#999',
+    color: theme.colors.textSecondary,
   },
   deleteButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   deleteButtonText: {
-    color: '#FF3B30',
+    color: theme.colors.danger,
     fontWeight: '600',
   },
   emptyContainer: {
@@ -310,13 +313,13 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: theme.colors.text,
     textAlign: 'center',
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   modalOverlay: {
@@ -326,7 +329,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.card,
     borderRadius: 16,
     padding: 24,
     width: '85%',
@@ -335,16 +338,18 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: theme.colors.text,
     marginBottom: 20,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: theme.colors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     marginBottom: 16,
+    color: theme.colors.text,
+    backgroundColor: theme.colors.surface,
   },
   textArea: {
     height: 100,
@@ -362,19 +367,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: theme.colors.surface,
     marginRight: 8,
   },
   cancelButtonText: {
-    color: '#666',
+    color: theme.colors.textSecondary,
     fontWeight: '600',
   },
   submitButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.primary,
     marginLeft: 8,
   },
   submitButtonText: {
-    color: '#FFFFFF',
+    color: theme.colors.background,
     fontWeight: '600',
   },
 });

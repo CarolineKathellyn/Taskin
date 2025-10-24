@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { TaskFilters as ITaskFilters, TaskPriority, TaskStatus } from '../../types';
-import { Colors, TaskPriorities, TaskStatuses, HARDCODED_CATEGORIES } from '../../constants';
+import { TaskPriorities, TaskStatuses, HARDCODED_CATEGORIES } from '../../constants';
 import { Button, Input } from '../common';
+import { useTheme, Theme } from '../../contexts/ThemeContext';
 
 interface TaskFiltersProps {
   filters: ITaskFilters;
   onFiltersChange: (filters: ITaskFilters) => void;
   projects: Array<{ id: string; name: string; color: string }>;
+  teams: Array<{ id: string; name: string }>;
 }
 
-export default function TaskFilters({ filters, onFiltersChange, projects }: TaskFiltersProps) {
+export default function TaskFilters({ filters, onFiltersChange, projects, teams }: TaskFiltersProps) {
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const styles = getStyles(theme);
   const [isVisible, setIsVisible] = useState(false);
   const [tempFilters, setTempFilters] = useState<ITaskFilters>(filters);
 
@@ -202,10 +208,47 @@ export default function TaskFilters({ filters, onFiltersChange, projects }: Task
     </View>
   );
 
+  const renderTeamFilter = () => (
+    <View style={styles.filterSection}>
+      <Text style={styles.filterTitle}>Equipe</Text>
+      <View style={styles.optionsContainer}>
+        <TouchableOpacity
+          style={[
+            styles.filterOption,
+            !tempFilters.teamId && styles.selectedOption
+          ]}
+          onPress={() => updateFilter('teamId', undefined)}
+        >
+          <Text style={[styles.optionText, !tempFilters.teamId && styles.selectedText]}>
+            Todas
+          </Text>
+        </TouchableOpacity>
+        {teams.map((team) => (
+          <TouchableOpacity
+            key={team.id}
+            style={[
+              styles.filterOption,
+              tempFilters.teamId === team.id && styles.selectedOption
+            ]}
+            onPress={() => updateFilter('teamId', team.id)}
+          >
+            <Ionicons name="people" size={14} color={theme.colors.primary} />
+            <Text style={[
+              styles.optionText,
+              tempFilters.teamId === team.id && styles.selectedText
+            ]}>
+              {team.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
   return (
     <>
       <TouchableOpacity style={styles.filterButton} onPress={() => setIsVisible(true)}>
-        <Ionicons name="filter-outline" size={20} color={Colors.primary} />
+        <Ionicons name="filter-outline" size={20} color={theme.colors.primary} />
         <Text style={styles.filterButtonText}>Filtros</Text>
         {activeFiltersCount > 0 && (
           <View style={styles.filterBadge}>
@@ -224,11 +267,11 @@ export default function TaskFilters({ filters, onFiltersChange, projects }: Task
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Filtros</Text>
             <TouchableOpacity onPress={handleCancel}>
-              <Ionicons name="close-outline" size={24} color={Colors.text} />
+              <Ionicons name="close-outline" size={24} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+          <ScrollView style={styles.modalContent} contentContainerStyle={{ paddingBottom: insets.bottom + 16 }} showsVerticalScrollIndicator={false}>
             <Input
               label="Buscar por título"
               placeholder="Digite para buscar..."
@@ -241,9 +284,10 @@ export default function TaskFilters({ filters, onFiltersChange, projects }: Task
             {renderPriorityFilter()}
             {renderCategoryFilter()}
             {renderProjectFilter()}
+            {renderTeamFilter()}
           </ScrollView>
 
-          <View style={styles.modalFooter}>
+          <View style={[styles.modalFooter, { paddingBottom: insets.bottom + 16 }]}>
             <Button
               title="Limpar"
               onPress={handleClearFilters}
@@ -262,26 +306,26 @@ export default function TaskFilters({ filters, onFiltersChange, projects }: Task
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: Theme) => StyleSheet.create({
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.surface,
+    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: theme.colors.primary,
   },
   filterButtonText: {
     marginLeft: 6,
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   filterBadge: {
     marginLeft: 6,
-    backgroundColor: Colors.danger,
+    backgroundColor: theme.colors.danger,
     borderRadius: 10,
     width: 20,
     height: 20,
@@ -291,11 +335,11 @@ const styles = StyleSheet.create({
   filterBadgeText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: Colors.background,
+    color: theme.colors.background,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -303,12 +347,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   modalContent: {
     flex: 1,
@@ -320,7 +364,7 @@ const styles = StyleSheet.create({
   filterTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 12,
   },
   optionsContainer: {
@@ -335,21 +379,21 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.surface,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
     gap: 4,
   },
   selectedOption: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   optionText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   selectedText: {
-    color: Colors.background,
+    color: theme.colors.background,
   },
   categoryDot: {
     width: 10,
@@ -361,7 +405,7 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: theme.colors.border,
   },
   footerButton: {
     flex: 1,
