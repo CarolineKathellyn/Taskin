@@ -1,12 +1,12 @@
 // Application constants following the Open/Closed Principle
 
 export const Colors = {
-  primary: '#007AFF',
-  secondary: '#5856D6',
+  primary: '#7C3AED',
+  secondary: '#A78BFA',
   success: '#34C759',
   warning: '#FF9500',
   danger: '#FF3B30',
-  info: '#5AC8FA',
+  info: '#A78BFA',
   light: '#F2F2F7',
   dark: '#1C1C1E',
   background: '#FFFFFF',
@@ -132,7 +132,7 @@ export const Strings = {
 
 export const Config = {
   // API
-  apiBaseUrl: 'http://10.0.2.2:8080/api', // Android emulator IP
+  apiBaseUrl: 'http://192.168.15.6:8080/api', // Android emulator IP
   apiTimeout: 10000,
 
   // Storage Keys
