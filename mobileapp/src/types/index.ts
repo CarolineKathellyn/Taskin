@@ -288,6 +288,9 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  biometricEnabled: boolean;
+  biometricAvailable: boolean;
+  biometricType: string | null;
 }
 
 export interface TaskState {

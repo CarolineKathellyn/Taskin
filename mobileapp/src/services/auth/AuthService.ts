@@ -1,6 +1,7 @@
 import { IAuthService, LoginRequest, RegisterRequest, AuthResponse, TaskinError } from '../../types';
 import { Config } from '../../constants';
 import { ValidationUtils, StorageUtils, JwtUtils, NetworkUtils } from '../../utils';
+import BiometricService from './BiometricService';
 
 export class AuthService implements IAuthService {
   private baseUrl: string;
@@ -37,7 +38,7 @@ export class AuthService implements IAuthService {
       await StorageUtils.setAsyncStorageItem(
         Config.storageKeys.userData,
         JSON.stringify({
-          userId: authResponse.userId,
+          id: authResponse.userId,
           email: authResponse.email,
           name: authResponse.name,
         })
@@ -82,7 +83,7 @@ export class AuthService implements IAuthService {
       await StorageUtils.setAsyncStorageItem(
         Config.storageKeys.userData,
         JSON.stringify({
-          userId: authResponse.userId,
+          id: authResponse.userId,
           email: authResponse.email,
           name: authResponse.name,
         })
@@ -103,6 +104,8 @@ export class AuthService implements IAuthService {
       await StorageUtils.removeSecureItem(Config.storageKeys.authToken);
       await StorageUtils.setAsyncStorageItem(Config.storageKeys.userData, '');
       await StorageUtils.setAsyncStorageItem(Config.storageKeys.lastSyncAt, '');
+      // Keep biometric preference enabled across sessions
+      // User can continue using biometric login after logout
     } catch (error) {
       throw new TaskinError('Erro ao fazer logout', 'LOGOUT_ERROR');
     }
@@ -206,7 +209,7 @@ export class AuthService implements IAuthService {
       await StorageUtils.setAsyncStorageItem(
         Config.storageKeys.userData,
         JSON.stringify({
-          userId: userResponse.id,
+          id: userResponse.id,
           email: userResponse.email,
           name: userResponse.name,
         })
@@ -254,6 +257,126 @@ export class AuthService implements IAuthService {
       }
       console.error('Change password network error:', error);
       throw new TaskinError(`Erro de conexão: ${error instanceof Error ? error.message : 'Verifique se o servidor está rodando'}`, 'NETWORK_ERROR');
+    }
+  }
+
+  /**
+   * Login with biometric authentication
+   * Retrieves stored token and user data if biometric auth succeeds
+   */
+  async loginWithBiometrics(): Promise<AuthResponse> {
+    try {
+      // Check if biometric is enabled
+      const isBiometricEnabled = await BiometricService.isBiometricEnabled();
+      if (!isBiometricEnabled) {
+        throw new TaskinError('Biometria não está habilitada', 'BIOMETRIC_NOT_ENABLED');
+      }
+
+      // Check if token exists
+      const token = await this.getStoredToken();
+      if (!token) {
+        throw new TaskinError('Nenhuma sessão salva encontrada', 'NO_SAVED_SESSION');
+      }
+
+      // Check if token is expired locally
+      if (!this.isTokenValid(token)) {
+        throw new TaskinError('Sessão expirada. Faça login novamente', 'SESSION_EXPIRED');
+      }
+
+      // Authenticate with biometrics
+      const biometricSuccess = await BiometricService.authenticate('Autentique para fazer login');
+      if (!biometricSuccess) {
+        throw new TaskinError('Falha na autenticação biométrica', 'BIOMETRIC_AUTH_FAILED');
+      }
+
+      // Retrieve stored user data
+      const userDataStr = await StorageUtils.getAsyncStorageItem(Config.storageKeys.userData);
+      if (!userDataStr) {
+        throw new TaskinError('Dados do usuário não encontrados', 'USER_DATA_NOT_FOUND');
+      }
+
+      const userData = JSON.parse(userDataStr);
+
+      // Return mock AuthResponse with stored data
+      return {
+        token,
+        type: 'Bearer',
+        userId: userData.id,
+        email: userData.email,
+        name: userData.name,
+        expiresIn: 0, // Not used for biometric login
+        expiresAt: '', // Not used for biometric login
+      };
+    } catch (error) {
+      if (error instanceof TaskinError) {
+        throw error;
+      }
+      console.error('Biometric login error:', error);
+      throw new TaskinError('Erro ao fazer login com biometria', 'BIOMETRIC_LOGIN_ERROR');
+    }
+  }
+
+  /**
+   * Enable biometric authentication for the current logged-in user
+   * Should be called after successful password authentication
+   */
+  async enableBiometricAuth(): Promise<void> {
+    try {
+      // Check if device supports biometrics
+      const capability = await BiometricService.checkBiometricCapability();
+      if (!capability.isAvailable) {
+        throw new TaskinError('Biometria não está disponível neste dispositivo', 'BIOMETRIC_NOT_AVAILABLE');
+      }
+
+      // Verify user has valid session
+      const token = await this.getStoredToken();
+      if (!token || !this.isTokenValid(token)) {
+        throw new TaskinError('Sessão inválida. Faça login novamente', 'INVALID_SESSION');
+      }
+
+      // Enable biometric
+      await BiometricService.enableBiometric();
+    } catch (error) {
+      if (error instanceof TaskinError) {
+        throw error;
+      }
+      console.error('Enable biometric error:', error);
+      throw new TaskinError('Erro ao habilitar biometria', 'ENABLE_BIOMETRIC_ERROR');
+    }
+  }
+
+  /**
+   * Disable biometric authentication
+   */
+  async disableBiometricAuth(): Promise<void> {
+    try {
+      await BiometricService.disableBiometric();
+    } catch (error) {
+      console.error('Disable biometric error:', error);
+      throw new TaskinError('Erro ao desabilitar biometria', 'DISABLE_BIOMETRIC_ERROR');
+    }
+  }
+
+  /**
+   * Check if biometric authentication is available and enabled
+   */
+  async canUseBiometric(): Promise<{ available: boolean; enabled: boolean; biometricType: string | null }> {
+    try {
+      const capability = await BiometricService.checkBiometricCapability();
+      const enabled = await BiometricService.isBiometricEnabled();
+
+      return {
+        available: capability.isAvailable,
+        enabled,
+        biometricType: capability.biometricType,
+      };
+    } catch (error) {
+      console.error('Check biometric capability error:', error);
+      return {
+        available: false,
+        enabled: false,
+        biometricType: null,
+      };
     }
   }
 }

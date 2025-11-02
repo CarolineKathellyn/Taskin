@@ -1,13 +1,21 @@
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, Alert } from 'react-native';
 import { store } from '../store';
 import { performDeltaSync, updatePendingChangesCount } from '../store/slices/syncSlice';
+import { logoutUser } from '../store/slices/authSlice';
 import NetInfo from '@react-native-community/netinfo';
+import { AuthService } from './auth/AuthService';
 
 class BackgroundSyncService {
   private syncInterval: NodeJS.Timeout | null = null;
   private isRunning = false;
   private syncIntervalMs = 30000; // 30 seconds
   private appStateSubscription: any = null;
+  private authService: AuthService;
+  private wasOffline = false;
+
+  constructor() {
+    this.authService = new AuthService();
+  }
 
   /**
    * Start background sync
@@ -133,14 +141,51 @@ class BackgroundSyncService {
   /**
    * Handle network changes
    */
-  private handleNetworkChange = (state: any) => {
-    if (state.isConnected) {
+  private handleNetworkChange = async (state: any) => {
+    if (state.isConnected && this.wasOffline) {
+      console.log('[BackgroundSync] Network reconnected after being offline, validating token');
+      this.wasOffline = false;
+
+      // Validate token with server when coming back online
+      const authState = store.getState().auth;
+      if (authState.isAuthenticated && authState.token) {
+        try {
+          const isValid = await this.authService.validateTokenWithServer();
+          if (!isValid) {
+            console.log('[BackgroundSync] Token invalid, logging out user');
+            Alert.alert(
+              'Sessão Expirada',
+              'Sua sessão expirou. Por favor, faça login novamente.',
+              [
+                {
+                  text: 'OK',
+                  onPress: () => store.dispatch(logoutUser())
+                }
+              ]
+            );
+            return;
+          }
+          console.log('[BackgroundSync] Token validated successfully');
+        } catch (error) {
+          console.error('[BackgroundSync] Token validation failed:', error);
+          // Don't logout on validation error, might be temporary network issue
+        }
+      }
+
+      // Perform sync after token validation
       console.log('[BackgroundSync] Network connected, performing sync');
       this.performSync().catch(error => {
         console.error('[BackgroundSync] Network change sync failed:', error);
       });
-    } else {
+    } else if (!state.isConnected) {
       console.log('[BackgroundSync] Network disconnected');
+      this.wasOffline = true;
+    } else if (state.isConnected && !this.wasOffline) {
+      // Network is connected and was already connected, just perform sync
+      console.log('[BackgroundSync] Network stable, performing sync');
+      this.performSync().catch(error => {
+        console.error('[BackgroundSync] Network change sync failed:', error);
+      });
     }
   };
 

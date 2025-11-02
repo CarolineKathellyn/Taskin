@@ -4,8 +4,6 @@ import { Provider, useDispatch } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { store, AppDispatch } from './src/store';
-import { validateToken } from './src/store/slices/authSlice';
-import { fetchUserTeams } from './src/store/slices/teamsSlice';
 import { DatabaseService } from './src/services/database/DatabaseService';
 import AppNavigator from './src/navigation/AppNavigator';
 import { ThemeProvider } from './src/contexts/ThemeContext';
@@ -22,15 +20,8 @@ function AppInitializer() {
         await databaseService.initializeDatabase();
         console.log('Database initialized');
 
-        const result = await dispatch(validateToken());
-        console.log('Token validation result:', result);
-
-        // If user is authenticated, fetch teams and populate team_members table
-        if (result.type === 'auth/validateToken/fulfilled') {
-          console.log('User authenticated, syncing team members...');
-          await dispatch(fetchUserTeams());
-          console.log('Team members synced to local database');
-        }
+        // Removed automatic token validation - user must login on every app open
+        console.log('App initialized - user must login');
       } catch (error) {
         console.error('App initialization error:', error);
       }

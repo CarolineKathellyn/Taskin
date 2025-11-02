@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
@@ -8,11 +8,12 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import { Ionicons } from '@expo/vector-icons';
 
 import { AppDispatch, RootState } from '../../store';
-import { logoutUser } from '../../store/slices/authSlice';
+import { logoutUser, enableBiometric, disableBiometric, checkBiometricAvailability } from '../../store/slices/authSlice';
 import { performDeltaSync } from '../../store/slices/syncSlice';
 import { Button, Card, Input } from '../../components/common';
 import { Colors, Strings } from '../../constants';
 import { useTheme, Theme } from '../../contexts/ThemeContext';
+import BiometricService from '../../services/auth/BiometricService';
 
 interface SettingItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -59,11 +60,15 @@ export default function SettingsScreen() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<SettingsScreenNavigationProp>();
   const insets = useSafeAreaInsets();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const { sync: syncState } = useSelector((state: RootState) => state);
+  const { user, biometricEnabled, biometricAvailable, biometricType } = useSelector((state: RootState) => state.auth);
+  const syncState = useSelector((state: RootState) => state.sync);
   const { theme, toggleTheme } = useTheme();
   const styles = getStyles(theme);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  useEffect(() => {
+    dispatch(checkBiometricAvailability());
+  }, [dispatch]);
 
   const handleLogout = async () => {
     Alert.alert(
@@ -123,6 +128,59 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleBiometricToggle = async (value: boolean) => {
+    if (value) {
+      // Enabling biometric - require authentication first
+      const authenticated = await BiometricService.authenticate('Autentique para habilitar login biométrico');
+      if (authenticated) {
+        try {
+          await dispatch(enableBiometric()).unwrap();
+          Alert.alert(
+            'Sucesso',
+            `Login ${biometricType === 'facial' ? 'por Face ID' : 'por impressão digital'} habilitado com sucesso!`,
+            [{ text: 'OK' }]
+          );
+        } catch (error: any) {
+          Alert.alert('Erro', error.toString(), [{ text: 'OK' }]);
+        }
+      } else {
+        Alert.alert('Falha', 'Falha na autenticação biométrica', [{ text: 'OK' }]);
+      }
+    } else {
+      // Disabling biometric
+      Alert.alert(
+        'Desabilitar Biometria',
+        'Deseja desabilitar o login biométrico?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Desabilitar',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await dispatch(disableBiometric()).unwrap();
+                Alert.alert('Sucesso', 'Login biométrico desabilitado', [{ text: 'OK' }]);
+              } catch (error: any) {
+                Alert.alert('Erro', error.toString(), [{ text: 'OK' }]);
+              }
+            }
+          }
+        ]
+      );
+    }
+  };
+
+  const getBiometricLabel = () => {
+    if (!biometricAvailable) return 'Biometria não disponível';
+    if (biometricType === 'facial') return 'Login com Face ID';
+    return 'Login com Impressão Digital';
+  };
+
+  const getBiometricSubtitle = () => {
+    if (!biometricAvailable) return 'Dispositivo não suporta biometria';
+    return biometricEnabled ? 'Login rápido habilitado' : 'Faça login mais rapidamente';
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}>
       {/* User Profile Section */}
@@ -142,6 +200,27 @@ export default function SettingsScreen() {
       </Card>
 
       {/* Settings Sections */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Segurança</Text>
+        <Card>
+          <SettingItem
+            icon={biometricType === 'facial' ? 'scan-outline' : 'finger-print-outline'}
+            title={getBiometricLabel()}
+            subtitle={getBiometricSubtitle()}
+            rightElement={
+              <Switch
+                value={biometricEnabled}
+                onValueChange={handleBiometricToggle}
+                disabled={!biometricAvailable}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor="#FFFFFF"
+              />
+            }
+            showArrow={false}
+          />
+        </Card>
+      </View>
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Configurações Gerais</Text>
         <Card>

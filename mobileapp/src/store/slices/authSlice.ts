@@ -137,12 +137,61 @@ export const changePassword = createAsyncThunk(
   }
 );
 
+export const loginWithBiometrics = createAsyncThunk(
+  'auth/loginWithBiometrics',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await authService.loginWithBiometrics();
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Biometric login failed');
+    }
+  }
+);
+
+export const enableBiometric = createAsyncThunk(
+  'auth/enableBiometric',
+  async (_, { rejectWithValue }) => {
+    try {
+      await authService.enableBiometricAuth();
+      return true;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to enable biometric');
+    }
+  }
+);
+
+export const disableBiometric = createAsyncThunk(
+  'auth/disableBiometric',
+  async (_, { rejectWithValue }) => {
+    try {
+      await authService.disableBiometricAuth();
+      return false;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to disable biometric');
+    }
+  }
+);
+
+export const checkBiometricAvailability = createAsyncThunk(
+  'auth/checkBiometricAvailability',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await authService.canUseBiometric();
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to check biometric availability');
+    }
+  }
+);
+
 const initialState: AuthState = {
   user: null,
   token: null,
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  biometricEnabled: false,
+  biometricAvailable: false,
+  biometricType: null,
 };
 
 export const authSlice = createSlice({
@@ -289,6 +338,60 @@ export const authSlice = createSlice({
       .addCase(changePassword.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      .addCase(loginWithBiometrics.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginWithBiometrics.fulfilled, (state, action: PayloadAction<AuthResponse>) => {
+        state.isLoading = false;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        const user = {
+          id: action.payload.userId,
+          email: action.payload.email,
+          name: action.payload.name,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        state.user = user;
+        state.error = null;
+      })
+      .addCase(loginWithBiometrics.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.isAuthenticated = false;
+      })
+      .addCase(enableBiometric.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(enableBiometric.fulfilled, (state) => {
+        state.isLoading = false;
+        state.biometricEnabled = true;
+        state.error = null;
+      })
+      .addCase(enableBiometric.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(disableBiometric.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(disableBiometric.fulfilled, (state) => {
+        state.isLoading = false;
+        state.biometricEnabled = false;
+        state.error = null;
+      })
+      .addCase(disableBiometric.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(checkBiometricAvailability.fulfilled, (state, action: PayloadAction<{ available: boolean; enabled: boolean; biometricType: string | null }>) => {
+        state.biometricAvailable = action.payload.available;
+        state.biometricEnabled = action.payload.enabled;
+        state.biometricType = action.payload.biometricType;
       });
   },
 });

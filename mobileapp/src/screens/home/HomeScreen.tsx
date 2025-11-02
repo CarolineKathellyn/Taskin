@@ -51,7 +51,7 @@ export default function HomeScreen() {
       // Process recurring tasks after data is loaded
       console.log('HomeScreen: Processing recurring tasks...');
       await dispatch(processRecurringTasks(user.id));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading data:', error);
     }
   };
