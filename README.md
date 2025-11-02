@@ -37,7 +37,7 @@
 
 | Id | Prioridade | User Story | Requisito | Critério de Aceitação | Sprint |
 |---|---|---|---|---|---|
-| 1 | Alta | Como usuário, eu quero criar uma conta com autenticação JWT, para acessar minhas tarefas com segurança. | 1 | Sistema deve permitir registro/login com JWT e sincronização de perfil. | 1 |
+| 1 | Alta | Como usuário, eu quero criar uma conta com autenticação, para acessar minhas tarefas com segurança. | 1 | Sistema deve permitir registro/login e sincronização de perfil. | 1 |
 | 2 | Alta | Como usuário, eu quero criar tarefas com título, descrição, prazo e prioridade, para organizar atividades. | 2 | Sistema deve permitir CRUD de tarefas com sincronização online/offline. | 1 |
 | 3 | Alta | Como usuário, eu quero visualizar tarefas em lista organizada, para controle visual das atividades. | 3 | Sistema deve exibir tarefas com filtros e indicadores visuais de status. | 1 |
 | 4 | Alta | Como usuário, eu quero que o app funcione offline, para acessar tarefas sem internet. | 4 | Sistema deve manter funcionalidades offline com sync automática. | 1 |
@@ -53,8 +53,7 @@
 | 14 | Baixa | Como usuário, quero gráficos e dashboards para analisar desempenho e produtividade. | 14 | Sistema deve gerar gráficos interativos e métricas. | 3 |
 | 15 | Baixa | Como usuário, eu quero criar projetos, para organização de tarefas. | 15 | Sistema deve permitir projetos com sub-tarefas. | 3 |
 | 16 | Baixa | Como usuário, eu quero exportar dados, para backup ou uso externo. | 16 | Sistema deve exportar as tarefas em formato de PDF. | 3 |
-| 17 | Baixa | Como usuário, eu quero personalizar interface, para adaptar ao estilo. | 17 | Sistema deve oferecer temas diferentes para personalização. | 3 |
-| 18 | Baixa | Como usuário, desejo que meu aplicativo esteja sempre atualizado. | 18 | Sistema deve oferecer updates automáticos para o usuário. | 3 |
+| 17 | Baixa | Como usuário, desejo que meu aplicativo esteja sempre atualizado. | 18 | Sistema deve oferecer updates automáticos para o usuário. | 3 |
 ---
 
 
