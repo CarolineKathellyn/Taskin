@@ -50,10 +50,9 @@
 | 11 | Média | Como usuário, eu quero receber notificações de prazos, para não perder deadlines. | 11 | Sistema deve enviar notificações para lembrar o usuário. | 2 |
 | 12 | Média | Como usuário, eu quero colaborar em tarefas compartilhadas, para trabalhar em equipe. | 12 | Sistema deve permitir compartilhamento de tarefas e criação de times. | 2 |
 | 13 | Baixa | Como usuário, eu quero anexar arquivos às tarefas, para centralizar informações. | 13 | Sistema deve suportar upload de imagens, documentos e links. | 3 |
-| 14 | Baixa | Como usuário, quero gráficos e dashboards para analisar desempenho e produtividade. | 14 | Sistema deve gerar gráficos interativos e métricas. | 3 |
-| 15 | Baixa | Como usuário, eu quero criar projetos, para organização de tarefas. | 15 | Sistema deve permitir projetos com sub-tarefas. | 3 |
-| 16 | Baixa | Como usuário, eu quero exportar dados, para backup ou uso externo. | 16 | Sistema deve exportar as tarefas em formato de PDF. | 3 |
-| 17 | Baixa | Como usuário, desejo que meu aplicativo esteja sempre atualizado. | 18 | Sistema deve oferecer updates automáticos para o usuário. | 3 |
+| 14 | Baixa | Como usuário, eu quero criar projetos, para organização de tarefas. | 15 | Sistema deve permitir projetos com sub-tarefas. | 3 |
+| 15 | Baixa | Como usuário, eu quero exportar dados, para backup ou uso externo. | 16 | Sistema deve exportar as tarefas em formato de PDF. | 3 |
+| 16 | Baixa | Como usuário, desejo que meu aplicativo esteja sempre atualizado. | 18 | Sistema deve oferecer updates automáticos para o usuário. | 3 |
 ---
 
 
